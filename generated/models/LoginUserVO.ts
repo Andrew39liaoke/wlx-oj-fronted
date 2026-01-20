@@ -11,4 +11,5 @@ export type LoginUserVO = {
     createTime?: string;
     updateTime?: string;
     token?: string;
+    userRole?: string;
 };

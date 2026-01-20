@@ -234,6 +234,7 @@ const handleFilter = () => {
 };
 
 const loadData = async () => {
+  console.log("loginUser.value.userRole", loginUser.value);
   const res = await QuestionControllerService.listQuestionVoByPage(
     searchParams.value
   );
@@ -358,6 +359,7 @@ const onRowClick = (record: Question) => {
     toQuestionPage(record);
     return;
   }
+  router.push("/user/login");
 };
 
 // Handle like/unlike functionality
