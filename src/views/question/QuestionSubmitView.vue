@@ -37,22 +37,22 @@
         {{ JSON.stringify(record.judgeInfo) }}
       </template>
       <template #createTime="{ record }">
-        {{ moment(record.createTime).format("YYYY-MM-DD") }}
+        {{ moment(record.createTime).format('YYYY-MM-DD') }}
       </template>
     </a-table>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watchEffect } from "vue";
+import { onMounted, ref, watchEffect } from 'vue';
 import {
   Question,
   QuestionControllerService,
   QuestionSubmitQueryRequest,
-} from "../../../generated";
-import message from "@arco-design/web-vue/es/message";
-import { useRouter } from "vue-router";
-import moment from "moment";
+} from '../../../generated';
+import message from '@arco-design/web-vue/es/message';
+import { useRouter } from 'vue-router';
+import moment from 'moment';
 
 const tableRef = ref();
 
@@ -68,14 +68,14 @@ const searchParams = ref<QuestionSubmitQueryRequest>({
 const loadData = async () => {
   const res = await QuestionControllerService.listQuestionSubmitByPage({
     ...searchParams.value,
-    sortField: "createTime",
-    sortOrder: "descend",
+    sortField: 'createTime',
+    sortOrder: 'descend',
   });
   if (res.code === 0) {
     dataList.value = res.data.records;
     total.value = res.data.total;
   } else {
-    message.error("加载失败，" + res.message);
+    message.error('加载失败，' + res.message);
   }
 };
 
@@ -95,32 +95,32 @@ onMounted(() => {
 
 const columns = [
   {
-    title: "提交号",
-    dataIndex: "id",
+    title: '提交号',
+    dataIndex: 'id',
   },
   {
-    title: "编程语言",
-    dataIndex: "language",
+    title: '编程语言',
+    dataIndex: 'language',
   },
   {
-    title: "判题信息",
-    slotName: "judgeInfo",
+    title: '判题信息',
+    slotName: 'judgeInfo',
   },
   {
-    title: "判题状态",
-    dataIndex: "status",
+    title: '判题状态',
+    dataIndex: 'status',
   },
   {
-    title: "题目 id",
-    dataIndex: "questionId",
+    title: '题目 id',
+    dataIndex: 'questionId',
   },
   {
-    title: "提交者 id",
-    dataIndex: "userId",
+    title: '提交者 id',
+    dataIndex: 'userId',
   },
   {
-    title: "创建时间",
-    slotName: "createTime",
+    title: '创建时间',
+    slotName: 'createTime',
   },
 ];
 

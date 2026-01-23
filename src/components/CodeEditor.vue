@@ -2,14 +2,14 @@
   <div
     id="code-editor"
     ref="codeEditorRef"
-    style="min-height: 400px; height: 60vh"
+    style="min-height: 480px; height: 60vh"
   />
   <!--  <a-button @click="fillValue">填充值</a-button>-->
 </template>
 
 <script setup lang="ts">
-import * as monaco from "monaco-editor";
-import { onMounted, ref, toRaw, withDefaults, defineProps, watch } from "vue";
+import * as monaco from 'monaco-editor';
+import { onMounted, ref, toRaw, withDefaults, defineProps, watch } from 'vue';
 
 /**
  * 定义组件属性类型
@@ -24,8 +24,8 @@ interface Props {
  * 给组件指定初始值
  */
 const props = withDefaults(defineProps<Props>(), {
-  value: () => "",
-  language: () => "java",
+  value: () => '',
+  language: () => 'java',
   handleChange: (v: string) => {
     console.log(v);
   },
@@ -68,7 +68,7 @@ onMounted(() => {
       enabled: true,
     },
     readOnly: false,
-    theme: "vs-dark",
+    theme: 'vs-dark',
     // lineNumbers: "off",
     // roundedSelection: false,
     // scrollBeyondLastLine: false,

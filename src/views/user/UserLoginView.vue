@@ -128,65 +128,65 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { reactive, ref } from 'vue';
 import {
   UserControllerService,
   UserLoginRequest,
   WxControllerService,
   OpenAPI,
-} from "../../../generated";
-import message from "@arco-design/web-vue/es/message";
-import { useRouter } from "vue-router";
-import { useStore } from "vuex";
+} from '../../../generated';
+import message from '@arco-design/web-vue/es/message';
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import {
   IconUser,
   IconLock,
   IconWechat,
   IconScan,
-} from "@arco-design/web-vue/es/icon";
+} from '@arco-design/web-vue/es/icon';
 
 const router = useRouter();
 const store = useStore();
 
 const form = reactive({
-  userName: "",
-  userPassword: "",
+  userName: '',
+  userPassword: '',
 } as UserLoginRequest);
 
 const rememberPassword = ref(false);
 const loading = ref(false);
 const qrCodeModalVisible = ref(false);
-const qrCodeUrl = ref("");
+const qrCodeUrl = ref('');
 let timer: any = null;
-let sceneId = ""; // 保存场景值（UUID）
+let sceneId = ''; // 保存场景值（UUID）
 
 const handleSubmit = async () => {
   loading.value = true;
   try {
     const res = await UserControllerService.login(form);
     if (res.code === 0) {
-      message.success("登录成功");
+      message.success('登录成功');
       // 保存 token 到全局状态和 localStorage
       if (res.data) {
-        store.dispatch("user/setToken", res.data.token);
+        store.dispatch('user/setToken', res.data.token);
       }
-      await store.dispatch("user/getLoginUser");
+      await store.dispatch('user/getLoginUser');
       router.push({
-        path: "/",
+        path: '/',
         replace: true,
       });
     } else {
-      message.error("登录失败，" + res.message);
+      message.error('登录失败，' + res.message);
     }
   } catch (error: any) {
-    message.error("登录失败，" + (error.message || "网络错误"));
+    message.error('登录失败，' + (error.message || '网络错误'));
   } finally {
     loading.value = false;
   }
 };
 
 const goToRegister = () => {
-  router.push("/user/register");
+  router.push('/user/register');
 };
 
 const handleWechatLogin = async () => {
@@ -194,35 +194,35 @@ const handleWechatLogin = async () => {
   try {
     // 1. 获取二维码和 SceneID
     // 后端返回结构: { code: 0, data: { qrCode: "base64...", uuid: "..." } }
-    console.log("Requesting QR code...");
+    console.log('Requesting QR code...');
     const response = await fetch(`${OpenAPI.BASE}/api/auth/wechat/qrCode`, {
-      method: "GET",
+      method: 'GET',
     });
 
-    if (!response.ok) throw new Error("网络请求失败");
+    if (!response.ok) throw new Error('网络请求失败');
 
     // 解析 JSON 响应
     const res = await response.json();
-    console.log("QR code response:", res);
+    console.log('QR code response:', res);
 
     if (res.code === 0 && res.data) {
-      console.log("Setting QR code and sceneId...");
+      console.log('Setting QR code and sceneId...');
       qrCodeUrl.value = res.data.qrCode;
       sceneId = res.data.uuid; // 保存 UUID 用于后续轮询
-      console.log("SceneId set to:", sceneId);
+      console.log('SceneId set to:', sceneId);
 
       // 2. 开始轮询 (带上 sceneId)
       if (timer) {
         clearInterval(timer);
       }
       timer = setInterval(checkLoginStatus, 2000);
-      console.log("Polling started with timer:", timer);
+      console.log('Polling started with timer:', timer);
     } else {
-      message.error("获取二维码失败：" + res.message);
+      message.error('获取二维码失败：' + res.message);
     }
   } catch (error: any) {
-    console.error("Failed to get WeChat QR code:", error);
-    message.error("获取微信二维码失败，" + (error.message || "网络错误"));
+    console.error('Failed to get WeChat QR code:', error);
+    message.error('获取微信二维码失败，' + (error.message || '网络错误'));
   }
 };
 
@@ -234,11 +234,11 @@ const checkLoginStatus = async () => {
     const response = await fetch(
       `${OpenAPI.BASE}/api/auth/wechat/check?state=${sceneId}`,
       {
-        method: "GET",
+        method: 'GET',
       }
     );
 
-    console.log("Response status:", response.status);
+    console.log('Response status:', response.status);
 
     if (response.ok) {
       const res = await response.json();
@@ -246,17 +246,17 @@ const checkLoginStatus = async () => {
       if (res.code === 0 && res.data) {
         clearInterval(timer);
         qrCodeModalVisible.value = false;
-        message.success("微信登录成功");
+        message.success('微信登录成功');
 
         // 设置 token
-        store.dispatch("user/setToken", res.data);
+        store.dispatch('user/setToken', res.data);
 
         // 获取用户信息
-        await store.dispatch("user/getLoginUser");
+        await store.dispatch('user/getLoginUser');
 
         // 跳转到首页
         router.push({
-          path: "/",
+          path: '/',
           replace: true,
         });
       }
@@ -266,17 +266,17 @@ const checkLoginStatus = async () => {
   }
 };
 
-import { watch } from "vue";
+import { watch } from 'vue';
 watch(qrCodeModalVisible, (newVal) => {
-  console.log("Modal visibility changed:", newVal);
+  console.log('Modal visibility changed:', newVal);
   if (!newVal) {
-    console.log("Clearing timer and resetting sceneId");
+    console.log('Clearing timer and resetting sceneId');
     if (timer) {
       clearInterval(timer);
       timer = null;
     }
-    sceneId = "";
-    qrCodeUrl.value = "";
+    sceneId = '';
+    qrCodeUrl.value = '';
   }
 });
 </script>

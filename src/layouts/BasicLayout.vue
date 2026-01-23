@@ -46,7 +46,7 @@
 }
 </style>
 <script>
-import GlobalHeader from "@/components/GlobalHeader";
+import GlobalHeader from '@/components/GlobalHeader';
 
 export default {
   components: { GlobalHeader },

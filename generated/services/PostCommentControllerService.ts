@@ -5,6 +5,7 @@
 import type { DeleteRequest } from '../models/DeleteRequest';
 import type { PostCommentRequest } from '../models/PostCommentRequest';
 import type { ResponseEntityBoolean } from '../models/ResponseEntityBoolean';
+import type { ResponseEntityListPostCommentVO } from '../models/ResponseEntityListPostCommentVO';
 import type { ResponseEntityLong } from '../models/ResponseEntityLong';
 import type { ResponseEntityPostCommentVO } from '../models/ResponseEntityPostCommentVO';
 
@@ -45,6 +46,24 @@ requestBody: PostCommentRequest,
             url: '/api/post/comment/save',
             body: requestBody,
             mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * 获取帖子的评论列表
+     * @param postId 
+     * @returns ResponseEntityListPostCommentVO OK
+     * @throws ApiError
+     */
+    public static getPostComments(
+postId: number,
+): CancelablePromise<ResponseEntityListPostCommentVO> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/post/comment/post/{postId}',
+            path: {
+                'postId': postId,
+            },
         });
     }
 

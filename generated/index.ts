@@ -38,6 +38,7 @@ export type { QuestionSubmitVO } from './models/QuestionSubmitVO';
 export type { QuestionUpdateRequest } from './models/QuestionUpdateRequest';
 export type { QuestionVO } from './models/QuestionVO';
 export type { ResponseEntityBoolean } from './models/ResponseEntityBoolean';
+export type { ResponseEntityListPostCommentVO } from './models/ResponseEntityListPostCommentVO';
 export type { ResponseEntityLoginUserVO } from './models/ResponseEntityLoginUserVO';
 export type { ResponseEntityLong } from './models/ResponseEntityLong';
 export type { ResponseEntityMapStringString } from './models/ResponseEntityMapStringString';

@@ -1,5 +1,5 @@
 // Add a request interceptor
-import axios from "axios";
+import axios from 'axios';
 
 axios.defaults.withCredentials = true;
 
@@ -17,7 +17,7 @@ axios.interceptors.request.use(
 // Add a response interceptor
 axios.interceptors.response.use(
   function (response) {
-    console.log("响应", response);
+    console.log('响应', response);
     // Any status code that lie within the range of 2xx cause this function to trigger
     // Do something with response data
     return response;

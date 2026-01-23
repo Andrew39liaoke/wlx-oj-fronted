@@ -118,18 +118,18 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from "vue";
-import { UserControllerService, UserRegisterRequest } from "../../../generated";
-import message from "@arco-design/web-vue/es/message";
-import { useRouter } from "vue-router";
-import { IconUser, IconLock, IconSafe } from "@arco-design/web-vue/es/icon";
+import { reactive, ref } from 'vue';
+import { UserControllerService, UserRegisterRequest } from '../../../generated';
+import message from '@arco-design/web-vue/es/message';
+import { useRouter } from 'vue-router';
+import { IconUser, IconLock, IconSafe } from '@arco-design/web-vue/es/icon';
 
 const router = useRouter();
 
 const form = reactive({
-  userName: "",
-  userPassword: "",
-  checkPassword: "",
+  userName: '',
+  userPassword: '',
+  checkPassword: '',
 } as UserRegisterRequest);
 
 const agreedToTerms = ref(false);
@@ -137,7 +137,7 @@ const loading = ref(false);
 
 const validatePasswordMatch = (value: any, cb: any) => {
   if (value !== form.userPassword) {
-    cb("两次输入的密码不一致");
+    cb('两次输入的密码不一致');
   } else {
     cb();
   }
@@ -145,30 +145,30 @@ const validatePasswordMatch = (value: any, cb: any) => {
 
 const handleSubmit = async () => {
   if (!agreedToTerms.value) {
-    message.warning("请先同意条款");
+    message.warning('请先同意条款');
     return;
   }
   loading.value = true;
   try {
     const res = await UserControllerService.userRegister(form);
     if (res.code === 0) {
-      message.success("注册成功");
+      message.success('注册成功');
       router.push({
-        path: "/user/login",
+        path: '/user/login',
         replace: true,
       });
     } else {
-      message.error("注册失败，" + res.message);
+      message.error('注册失败，' + res.message);
     }
   } catch (error: any) {
-    message.error("注册失败，" + (error.message || "网络错误"));
+    message.error('注册失败，' + (error.message || '网络错误'));
   } finally {
     loading.value = false;
   }
 };
 
 const goToLogin = () => {
-  router.push("/user/login");
+  router.push('/user/login');
 };
 </script>
 

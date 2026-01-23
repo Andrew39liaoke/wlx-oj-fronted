@@ -85,12 +85,12 @@
                 `${
                   record.submitNum
                     ? ((record.acceptedNum / record.submitNum) * 100).toFixed(1)
-                    : "0"
+                    : '0'
                 }% (${record.acceptedNum}/${record.submitNum || 0})`
               }}
             </template>
             <template #createTime="{ record }">
-              {{ moment(record.createTime).format("YYYY-MM-DD") }}
+              {{ moment(record.createTime).format('YYYY-MM-DD') }}
             </template>
             <template #actions="{ record }">
               <a-space>
@@ -142,9 +142,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watchEffect, computed } from "vue";
-import { useStore } from "vuex";
-import ACCESS_ENUM from "@/access/accessEnum";
+import { onMounted, ref, watchEffect, computed } from 'vue';
+import { useStore } from 'vuex';
+import ACCESS_ENUM from '@/access/accessEnum';
 import {
   Question,
   QuestionControllerService,
@@ -152,11 +152,11 @@ import {
   QuestionVO,
   QuestionThumbControllerService,
   QuestionFavourControllerService,
-} from "../../../generated";
-import message from "@arco-design/web-vue/es/message";
+} from '../../../generated';
+import message from '@arco-design/web-vue/es/message';
 // import * as querystring from "querystring"; // Replaced with native URLSearchParams
-import { useRouter } from "vue-router";
-import moment from "moment";
+import { useRouter } from 'vue-router';
+import moment from 'moment';
 import {
   IconMenu,
   IconExperiment,
@@ -170,7 +170,7 @@ import {
   IconFilter,
   IconHeart,
   IconStar,
-} from "@arco-design/web-vue/es/icon";
+} from '@arco-design/web-vue/es/icon';
 
 // Vuex store
 const store = useStore();
@@ -187,7 +187,7 @@ const tableRef = ref();
 const dataList = ref<QuestionVO[]>([]);
 const total = ref(0);
 const searchParams = ref<QuestionQueryRequest>({
-  title: "",
+  title: '',
   tags: [],
   pageSize: 8,
   current: 1,
@@ -207,34 +207,34 @@ const currentUserId = computed(() => loginUser.value?.id);
 
 // category pills (use imported icon components)
 const categories = [
-  { key: "all", label: "全部题目", icon: IconMenu, iconColor: "#f97316" },
-  { key: "algo", label: "算法", icon: IconExperiment, iconColor: "#f59e0b" },
-  { key: "db", label: "数据库", icon: IconStorage, iconColor: "#06b6d4" },
-  { key: "shell", label: "Shell", icon: IconCommand, iconColor: "#10b981" },
-  { key: "thread", label: "多线程", icon: IconBranch, iconColor: "#8b5cf6" },
-  { key: "js", label: "JavaScript", icon: IconCode, iconColor: "#3b82f6" },
-  { key: "pandas", label: "pandas", icon: IconBarChart, iconColor: "#ef4444" },
+  { key: 'all', label: '全部题目', icon: IconMenu, iconColor: '#f97316' },
+  { key: 'algo', label: '算法', icon: IconExperiment, iconColor: '#f59e0b' },
+  { key: 'db', label: '数据库', icon: IconStorage, iconColor: '#06b6d4' },
+  { key: 'shell', label: 'Shell', icon: IconCommand, iconColor: '#10b981' },
+  { key: 'thread', label: '多线程', icon: IconBranch, iconColor: '#8b5cf6' },
+  { key: 'js', label: 'JavaScript', icon: IconCode, iconColor: '#3b82f6' },
+  { key: 'pandas', label: 'pandas', icon: IconBarChart, iconColor: '#ef4444' },
 ];
-const selectedCategory = ref("all");
+const selectedCategory = ref('all');
 
 const handleCategoryClick = (cat: { key: string }) => {
   selectedCategory.value = cat.key;
   // TODO: implement filtering or remote fetch based on category
-  console.log("Category clicked (TODO):", cat.key);
+  console.log('Category clicked (TODO):', cat.key);
 };
 
 const handleSort = () => {
   // TODO: implement sort behaviour
-  console.log("sort clicked");
+  console.log('sort clicked');
 };
 
 const handleFilter = () => {
   // TODO: implement filter behaviour
-  console.log("filter clicked");
+  console.log('filter clicked');
 };
 
 const loadData = async () => {
-  console.log("loginUser.value.userRole", loginUser.value);
+  console.log('loginUser.value.userRole', loginUser.value);
   const res = await QuestionControllerService.listQuestionVoByPage(
     searchParams.value
   );
@@ -247,7 +247,7 @@ const loadData = async () => {
       await loadUserActionStatus();
     }
   } else {
-    message.error("加载失败，" + res.message);
+    message.error('加载失败，' + res.message);
   }
 };
 
@@ -278,7 +278,7 @@ const loadUserActionStatus = async () => {
 
     userActionStatus.value = statusMap;
   } catch (error) {
-    console.error("Failed to load user action status:", error);
+    console.error('Failed to load user action status:', error);
   }
 };
 
@@ -318,30 +318,30 @@ onMounted(async () => {
 
 const columns = [
   {
-    title: "题号",
-    dataIndex: "id",
+    title: '题号',
+    dataIndex: 'id',
   },
   {
-    title: "题目名称",
-    dataIndex: "title",
+    title: '题目名称',
+    dataIndex: 'title',
   },
   {
-    title: "标签",
-    slotName: "tags",
+    title: '标签',
+    slotName: 'tags',
   },
   {
-    title: "通过率",
-    slotName: "acceptedRate",
+    title: '通过率',
+    slotName: 'acceptedRate',
   },
   {
-    title: "创建时间",
-    slotName: "createTime",
+    title: '创建时间',
+    slotName: 'createTime',
   },
   {
-    title: "操作",
-    slotName: "actions",
+    title: '操作',
+    slotName: 'actions',
     width: 100,
-    align: "center",
+    align: 'center',
   },
 ];
 
@@ -353,25 +353,25 @@ const onPageChange = (page: number) => {
 };
 
 const onRowClick = (record: Question) => {
-  console.log("1111" + isLoggedIn.value);
+  console.log('1111' + isLoggedIn.value);
   // 如果 store 中已经显示为已登录，则直接进入题目详情
   if (isLoggedIn.value) {
     toQuestionPage(record);
     return;
   }
-  router.push("/user/login");
+  router.push('/user/login');
 };
 
 // Handle like/unlike functionality
 const handleLike = async (question: QuestionVO) => {
   if (!isLoggedIn.value) {
-    message.warning("请先登录");
-    router.push("/user/login");
+    message.warning('请先登录');
+    router.push('/user/login');
     return;
   }
 
   if (!question.id) {
-    message.error("题目ID不存在");
+    message.error('题目ID不存在');
     return;
   }
 
@@ -402,26 +402,26 @@ const handleLike = async (question: QuestionVO) => {
     }
 
     if (success) {
-      message.success(currentStatus.thumbed ? "已取消点赞" : "点赞成功");
+      message.success(currentStatus.thumbed ? '已取消点赞' : '点赞成功');
     } else {
-      message.error("操作失败");
+      message.error('操作失败');
     }
   } catch (error) {
-    console.error("Like operation failed:", error);
-    message.error("操作失败，请重试");
+    console.error('Like operation failed:', error);
+    message.error('操作失败，请重试');
   }
 };
 
 // 题目收藏与取消收藏
 const handleFavorite = async (question: QuestionVO) => {
   if (!isLoggedIn.value) {
-    message.warning("请先登录");
-    router.push("/user/login");
+    message.warning('请先登录');
+    router.push('/user/login');
     return;
   }
 
   if (!question.id) {
-    message.error("题目ID不存在");
+    message.error('题目ID不存在');
     return;
   }
 
@@ -452,13 +452,13 @@ const handleFavorite = async (question: QuestionVO) => {
     }
 
     if (success) {
-      message.success(currentStatus.favoured ? "已取消收藏" : "收藏成功");
+      message.success(currentStatus.favoured ? '已取消收藏' : '收藏成功');
     } else {
-      message.error("操作失败");
+      message.error('操作失败');
     }
   } catch (error) {
-    console.error("Favourite operation failed:", error);
-    message.error("操作失败，请重试");
+    console.error('Favourite operation failed:', error);
+    message.error('操作失败，请重试');
   }
 };
 
@@ -469,7 +469,7 @@ const router = useRouter();
  * @param question
  */
 const toQuestionPage = (question: Question) => {
-  console.log("跳转到做题页面", question);
+  console.log('跳转到做题页面', question);
   router.push({
     path: `/view/question/${question.id}`,
   });

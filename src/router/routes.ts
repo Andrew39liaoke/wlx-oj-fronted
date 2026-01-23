@@ -1,31 +1,32 @@
-import { RouteRecordRaw } from "vue-router";
-import HomeView from "@/views/ExampleView.vue";
-import UserLayout from "@/layouts/UserLayout.vue";
-import UserLoginView from "@/views/user/UserLoginView.vue";
-import UserRegisterView from "@/views/user/UserRegisterView.vue";
-import AdminView from "@/views/AdminView.vue";
-import NoAuthView from "@/views/NoAuthView.vue";
-import ACCESS_ENUM from "@/access/accessEnum";
-import AddQuestionView from "@/views/question/AddQuestionView.vue";
-import ManageQuestionView from "@/views/question/ManageQuestionView.vue";
-import QuestionsView from "@/views/question/QuestionsView.vue";
-import QuestionSubmitView from "@/views/question/QuestionSubmitView.vue";
-import ViewQuestionView from "@/views/question/ViewQuestionView.vue";
+import { RouteRecordRaw } from 'vue-router';
+import HomeView from '@/views/ExampleView.vue';
+import UserLayout from '@/layouts/UserLayout.vue';
+import UserLoginView from '@/views/user/UserLoginView.vue';
+import UserRegisterView from '@/views/user/UserRegisterView.vue';
+import AdminView from '@/views/AdminView.vue';
+import NoAuthView from '@/views/NoAuthView.vue';
+import ACCESS_ENUM from '@/access/accessEnum';
+import AddQuestionView from '@/views/question/AddQuestionView.vue';
+import ManageQuestionView from '@/views/question/ManageQuestionView.vue';
+import QuestionsView from '@/views/question/QuestionsView.vue';
+import QuestionSubmitView from '@/views/question/QuestionSubmitView.vue';
+import ViewQuestionView from '@/views/question/ViewQuestionView.vue';
+import PostListView from '@/views/post/post-list.vue';
 
 export const routes: Array<RouteRecordRaw> = [
   {
-    path: "/user",
-    name: "用户",
+    path: '/user',
+    name: '用户',
     component: UserLayout,
     children: [
       {
-        path: "/user/login",
-        name: "用户登录",
+        path: '/user/login',
+        name: '用户登录',
         component: UserLoginView,
       },
       {
-        path: "/user/register",
-        name: "用户注册",
+        path: '/user/register',
+        name: '用户注册',
         component: UserRegisterView,
       },
     ],
@@ -39,35 +40,27 @@ export const routes: Array<RouteRecordRaw> = [
     component: QuestionsView,
   }, */
   {
-    path: "/",
-    name: "题库",
+    path: '/',
+    name: '题库',
     component: QuestionsView,
   },
 
   {
-    path: "/question_submit",
-    name: "浏览题目提交",
+    path: '/question_submit',
+    name: '浏览题目提交',
     component: QuestionSubmitView,
   },
   {
-    path: "/community",
-    name: "社区互动",
-    component: () => import("@/views/CommunityView.vue"),
+    path: '/recommend',
+    name: '个性化推荐',
+    component: () => import('@/views/RecommendView.vue'),
     /*     meta: {
       hideInMenu: true,
     }, */
   },
   {
-    path: "/recommend",
-    name: "个性化推荐",
-    component: () => import("@/views/RecommendView.vue"),
-    /*     meta: {
-      hideInMenu: true,
-    }, */
-  },
-  {
-    path: "/view/question/:id",
-    name: "在线做题",
+    path: '/view/question/:id',
+    name: '在线做题',
     component: ViewQuestionView,
     props: true,
     meta: {
@@ -76,16 +69,16 @@ export const routes: Array<RouteRecordRaw> = [
     },
   },
   {
-    path: "/add/question",
-    name: "创建题目",
+    path: '/add/question',
+    name: '创建题目',
     component: AddQuestionView,
     meta: {
       access: ACCESS_ENUM.USER,
     },
   },
   {
-    path: "/update/question",
-    name: "更新题目",
+    path: '/update/question',
+    name: '更新题目',
     component: AddQuestionView,
     meta: {
       access: ACCESS_ENUM.USER,
@@ -93,8 +86,8 @@ export const routes: Array<RouteRecordRaw> = [
     },
   },
   {
-    path: "/manage/question/",
-    name: "管理题目",
+    path: '/manage/question/',
+    name: '管理题目',
     component: ManageQuestionView,
     meta: {
       access: ACCESS_ENUM.ADMIN,
@@ -110,11 +103,19 @@ export const routes: Array<RouteRecordRaw> = [
   //   },
   // },
   {
-    path: "/noAuth",
-    name: "无权限",
+    path: '/noAuth',
+    name: '无权限',
     component: NoAuthView,
     meta: {
       hideInMenu: true,
+    },
+  },
+  {
+    path: '/post/list',
+    name: '帖子列表',
+    component: PostListView,
+    meta: {
+      access: ACCESS_ENUM.USER,
     },
   },
   // {
