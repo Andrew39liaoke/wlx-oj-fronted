@@ -14,7 +14,6 @@ export type PostVO = {
     zone?: string;
     viewNum?: number;
     zoneName?: string;
-    tags?: Array<string>;
     userId?: number;
     updater?: number;
     createTime?: string;

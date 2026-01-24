@@ -12,6 +12,7 @@ import QuestionsView from '@/views/question/QuestionsView.vue';
 import QuestionSubmitView from '@/views/question/QuestionSubmitView.vue';
 import ViewQuestionView from '@/views/question/ViewQuestionView.vue';
 import PostListView from '@/views/post/post-list.vue';
+import ViewPostView from '@/views/post/ViewPostView.vue';
 
 export const routes: Array<RouteRecordRaw> = [
   {
@@ -116,6 +117,16 @@ export const routes: Array<RouteRecordRaw> = [
     component: PostListView,
     meta: {
       access: ACCESS_ENUM.USER,
+    },
+  },
+  {
+    path: '/view/post/:id',
+    name: '帖子详情',
+    component: ViewPostView,
+    props: true,
+    meta: {
+      access: ACCESS_ENUM.USER,
+      hideInMenu: true,
     },
   },
   // {
