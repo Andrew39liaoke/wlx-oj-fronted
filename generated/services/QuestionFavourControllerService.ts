@@ -1,4 +1,4 @@
-/* generated using openapi-typescript-codegen -- do no edit */
+﻿/* generated using openapi-typescript-codegen -- do no edit */
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
@@ -12,56 +12,53 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 
 export class QuestionFavourControllerService {
+  /**
+   * 鏀惰棌棰樼洰
+   * @param requestBody
+   * @returns ResponseEntityBoolean OK
+   * @throws ApiError
+   */
+  public static save1(
+    requestBody: DeleteRequest
+  ): CancelablePromise<ResponseEntityBoolean> {
+    return __request(OpenAPI, {
+      method: 'POST',
+      url: '/api/question/question/favour/save',
+      body: requestBody,
+      mediaType: 'application/json',
+    });
+  }
 
-    /**
-     * 收藏题目
-     * @param requestBody 
-     * @returns ResponseEntityBoolean OK
-     * @throws ApiError
-     */
-    public static save1(
-requestBody: DeleteRequest,
-): CancelablePromise<ResponseEntityBoolean> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/question/question/favour/save',
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
+  /**
+   * 鍒嗛〉鏌ヨ鐢ㄦ埛鏀惰棌鐨勯鐩?     * @param requestBody
+   * @returns ResponseEntityPageQuestionVO OK
+   * @throws ApiError
+   */
+  public static page1(
+    requestBody: QuestionQueryRequest
+  ): CancelablePromise<ResponseEntityPageQuestionVO> {
+    return __request(OpenAPI, {
+      method: 'POST',
+      url: '/api/question/question/favour/page',
+      body: requestBody,
+      mediaType: 'application/json',
+    });
+  }
 
-    /**
-     * 分页查询用户收藏的题目
-     * @param requestBody 
-     * @returns ResponseEntityPageQuestionVO OK
-     * @throws ApiError
-     */
-    public static page1(
-requestBody: QuestionQueryRequest,
-): CancelablePromise<ResponseEntityPageQuestionVO> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/question/question/favour/page',
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-
-    /**
-     * 取消收藏
-     * @param requestBody 
-     * @returns ResponseEntityBoolean OK
-     * @throws ApiError
-     */
-    public static remove1(
-requestBody: DeleteRequest,
-): CancelablePromise<ResponseEntityBoolean> {
-        return __request(OpenAPI, {
-            method: 'DELETE',
-            url: '/api/question/question/favour/remove',
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-
+  /**
+   * 鍙栨秷鏀惰棌
+   * @param requestBody
+   * @returns ResponseEntityBoolean OK
+   * @throws ApiError
+   */
+  public static remove1(
+    requestBody: DeleteRequest
+  ): CancelablePromise<ResponseEntityBoolean> {
+    return __request(OpenAPI, {
+      method: 'DELETE',
+      url: '/api/question/question/favour/remove',
+      body: requestBody,
+      mediaType: 'application/json',
+    });
+  }
 }

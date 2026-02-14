@@ -1,4 +1,4 @@
-/* generated using openapi-typescript-codegen -- do no edit */
+﻿/* generated using openapi-typescript-codegen -- do no edit */
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
@@ -6,7 +6,7 @@
 import type { UserVO } from './UserVO';
 
 export type ResponseEntityUserVO = {
-    code?: number;
-    data?: UserVO;
-    message?: string;
+  code?: number;
+  data?: UserVO;
+  message?: string;
 };

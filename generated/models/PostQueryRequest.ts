@@ -1,15 +1,15 @@
-/* generated using openapi-typescript-codegen -- do no edit */
+﻿/* generated using openapi-typescript-codegen -- do no edit */
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
 
 export type PostQueryRequest = {
-    current?: number;
-    pageSize?: number;
-    sortField?: string;
-    sortOrder?: string;
-    userId?: number;
-    title?: string;
-    zone?: string;
-    tags?: Array<string>;
+  current?: number;
+  pageSize?: number;
+  sortField?: string;
+  sortOrder?: string;
+  userId?: number;
+  title?: string;
+  zone?: string;
+  tags?: Array<string>;
 };

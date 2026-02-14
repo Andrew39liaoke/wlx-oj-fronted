@@ -1,11 +1,11 @@
-/* generated using openapi-typescript-codegen -- do no edit */
+﻿/* generated using openapi-typescript-codegen -- do no edit */
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
 
 /**
- * 帖子 id
+ * 甯栧瓙 id
  */
 export type DeleteRequest = {
-    id?: number;
+  id?: number;
 };

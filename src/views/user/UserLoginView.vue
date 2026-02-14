@@ -168,7 +168,7 @@ const handleSubmit = async () => {
       message.success('登录成功');
       // 保存 token 到全局状态和 localStorage
       if (res.data) {
-        store.dispatch('user/setToken', res.data.token);
+        await store.dispatch('user/setToken', res.data.token);
       }
       await store.dispatch('user/getLoginUser');
       router.push({
@@ -247,10 +247,7 @@ const checkLoginStatus = async () => {
         clearInterval(timer);
         qrCodeModalVisible.value = false;
         message.success('微信登录成功');
-
-        // 设置 token
-        store.dispatch('user/setToken', res.data);
-
+        await store.dispatch('user/setToken', res.data.token);
         // 获取用户信息
         await store.dispatch('user/getLoginUser');
 

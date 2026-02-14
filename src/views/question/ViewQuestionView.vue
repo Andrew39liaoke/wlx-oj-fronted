@@ -224,21 +224,18 @@ import {
 } from '../../../generated';
 
 interface Props {
-  id: string;
+  id: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  id: () => '',
+  id: () => 0,
 });
 
 const question = ref<QuestionVO>();
 const viewerPlugins = [gfm(), highlight()];
 
 const loadData = async () => {
-  const idNum = Number(props.id);
-  const res = await QuestionControllerService.getQuestionVoById(
-    Number.isNaN(idNum) ? (props.id as any) : idNum
-  );
+  const res = await QuestionControllerService.getQuestionVoById(props.id);
   console.log('res', res);
   if (res.code === 0) {
     question.value = res.data;

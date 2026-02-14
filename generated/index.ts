@@ -1,4 +1,4 @@
-/* generated using openapi-typescript-codegen -- do no edit */
+﻿/* generated using openapi-typescript-codegen -- do no edit */
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
@@ -7,12 +7,19 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export type { ClassQueryRequest } from './models/ClassQueryRequest';
+export type { ClassQuestionQueryRequest } from './models/ClassQuestionQueryRequest';
+export type { ClassStudentQueryRequest } from './models/ClassStudentQueryRequest';
+export type { ClassVO } from './models/ClassVO';
 export type { DeleteRequest } from './models/DeleteRequest';
+export type { FileInfo } from './models/FileInfo';
+export type { FileUploadResponse } from './models/FileUploadResponse';
 export type { JudgeCase } from './models/JudgeCase';
 export type { JudgeConfig } from './models/JudgeConfig';
 export type { JudgeInfo } from './models/JudgeInfo';
 export type { LoginUserVO } from './models/LoginUserVO';
 export type { OrderItem } from './models/OrderItem';
+export type { PageClassVO } from './models/PageClassVO';
 export type { PagePostVO } from './models/PagePostVO';
 export type { PageQuestion } from './models/PageQuestion';
 export type { PageQuestionSubmitVO } from './models/PageQuestionSubmitVO';
@@ -38,11 +45,15 @@ export type { QuestionSubmitVO } from './models/QuestionSubmitVO';
 export type { QuestionUpdateRequest } from './models/QuestionUpdateRequest';
 export type { QuestionVO } from './models/QuestionVO';
 export type { ResponseEntityBoolean } from './models/ResponseEntityBoolean';
+export type { ResponseEntityFileInfo } from './models/ResponseEntityFileInfo';
+export type { ResponseEntityFileUploadResponse } from './models/ResponseEntityFileUploadResponse';
+export type { ResponseEntityListMapStringObject } from './models/ResponseEntityListMapStringObject';
 export type { ResponseEntityListPostCommentVO } from './models/ResponseEntityListPostCommentVO';
 export type { ResponseEntityLoginUserVO } from './models/ResponseEntityLoginUserVO';
 export type { ResponseEntityLong } from './models/ResponseEntityLong';
 export type { ResponseEntityMapStringString } from './models/ResponseEntityMapStringString';
 export type { ResponseEntityObject } from './models/ResponseEntityObject';
+export type { ResponseEntityPageClassVO } from './models/ResponseEntityPageClassVO';
 export type { ResponseEntityPagePostVO } from './models/ResponseEntityPagePostVO';
 export type { ResponseEntityPageQuestion } from './models/ResponseEntityPageQuestion';
 export type { ResponseEntityPageQuestionSubmitVO } from './models/ResponseEntityPageQuestionSubmitVO';
@@ -67,10 +78,13 @@ export type { UserUpdateRequest } from './models/UserUpdateRequest';
 export type { UserVO } from './models/UserVO';
 export type { WeChatRequest } from './models/WeChatRequest';
 
+export { ClassControllerService } from './services/ClassControllerService';
+export { FileControllerService } from './services/FileControllerService';
 export { JudgeInnerControllerService } from './services/JudgeInnerControllerService';
 export { PostCommentControllerService } from './services/PostCommentControllerService';
 export { PostControllerService } from './services/PostControllerService';
 export { PostFavourControllerService } from './services/PostFavourControllerService';
+export { PostInnerControllerService } from './services/PostInnerControllerService';
 export { PostThumbControllerService } from './services/PostThumbControllerService';
 export { QuestionControllerService } from './services/QuestionControllerService';
 export { QuestionFavourControllerService } from './services/QuestionFavourControllerService';

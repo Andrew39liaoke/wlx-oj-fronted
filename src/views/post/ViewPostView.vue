@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div id="viewPostView" class="view-post-container">
     <a-card class="post-card" bordered>
       <div class="post-header">
@@ -35,9 +35,20 @@
 
       <div class="comment-editor">
         <div class="comment-avatar-left">
-          <a-avatar :size="40" :src="post?.user?.userAvatar">
-            {{ post?.user?.userName?.charAt(0)?.toUpperCase() || 'U' }}
-          </a-avatar>
+          <div
+            class="user-avatar"
+            :style="{
+              backgroundImage: post?.user?.userAvatar
+                ? `url(${post?.user?.userAvatar})`
+                : 'none',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }"
+          >
+            <span v-if="!post?.user?.userAvatar" class="avatar-fallback">
+              {{ post?.user?.userName?.charAt(0)?.toUpperCase() || 'U' }}
+            </span>
+          </div>
         </div>
         <div class="comment-editor-body">
           <textarea
@@ -181,8 +192,7 @@ const commentTree = computed<CommentNode[]>(() => {
   return roots;
 });
 
-// 使用独立组件渲染评论（已在上方 import）
-
+// 使用独立组件渲染评论（已在上�?import�?
 const submitTopLevelComment = async () => {
   if (!newCommentContent.value || !newCommentContent.value.trim()) {
     message.warning('评论不能为空');
@@ -343,5 +353,36 @@ const submitTopLevelComment = async () => {
 .no-comments {
   color: #94a3b8;
   padding: 12px 0;
+}
+
+/* Markdown 文档图片展示控制 */
+:deep(.markdown-body img),
+:deep(.bytemd-preview img) {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 8px auto;
+}
+
+:deep(.markdown-body img) {
+  max-height: 200px;
+  object-fit: contain;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #f0f2f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.avatar-fallback {
+  font-weight: 600;
+  font-size: 16px;
+  color: #666;
 }
 </style>

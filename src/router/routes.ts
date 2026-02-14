@@ -13,7 +13,10 @@ import QuestionSubmitView from '@/views/question/QuestionSubmitView.vue';
 import ViewQuestionView from '@/views/question/ViewQuestionView.vue';
 import PostListView from '@/views/post/post-list.vue';
 import ViewPostView from '@/views/post/ViewPostView.vue';
-
+import AddPostView from '@/views/post/AddPostView.vue';
+import RecommendView from '@/views/RecommendView.vue';
+import UserCenter from '@/views/UserCenter/UserCenter.vue';
+import AiChat from '@/views/AiChat.vue';
 export const routes: Array<RouteRecordRaw> = [
   {
     path: '/user',
@@ -52,20 +55,12 @@ export const routes: Array<RouteRecordRaw> = [
     component: QuestionSubmitView,
   },
   {
-    path: '/recommend',
-    name: '个性化推荐',
-    component: () => import('@/views/RecommendView.vue'),
-    /*     meta: {
-      hideInMenu: true,
-    }, */
-  },
-  {
     path: '/view/question/:id',
     name: '在线做题',
     component: ViewQuestionView,
     props: true,
     meta: {
-      access: ACCESS_ENUM.USER,
+      access: [ACCESS_ENUM.STUDENT, ACCESS_ENUM.TEACHER],
       hideInMenu: true,
     },
   },
@@ -74,7 +69,7 @@ export const routes: Array<RouteRecordRaw> = [
     name: '创建题目',
     component: AddQuestionView,
     meta: {
-      access: ACCESS_ENUM.USER,
+      access: [ACCESS_ENUM.STUDENT, ACCESS_ENUM.TEACHER],
     },
   },
   {
@@ -82,7 +77,7 @@ export const routes: Array<RouteRecordRaw> = [
     name: '更新题目',
     component: AddQuestionView,
     meta: {
-      access: ACCESS_ENUM.USER,
+      access: [ACCESS_ENUM.STUDENT, ACCESS_ENUM.TEACHER],
       hideInMenu: true,
     },
   },
@@ -94,15 +89,15 @@ export const routes: Array<RouteRecordRaw> = [
       access: ACCESS_ENUM.ADMIN,
     },
   },
-
-  // {
-  //   path: "/hide",
-  //   name: "隐藏页面",
-  //   component: HomeView,
-  //   meta: {
-  //     hideInMenu: true,
-  //   },
-  // },
+  {
+    path: '/recommend',
+    name: '个性化推荐',
+    component: RecommendView,
+    meta: {
+      access: [ACCESS_ENUM.STUDENT, ACCESS_ENUM.TEACHER],
+      hideInMenu: true,
+    },
+  },
   {
     path: '/noAuth',
     name: '无权限',
@@ -115,8 +110,22 @@ export const routes: Array<RouteRecordRaw> = [
     path: '/post/list',
     name: '帖子列表',
     component: PostListView,
+  },
+  {
+    path: '/add/post',
+    name: '发布帖子',
+    component: AddPostView,
     meta: {
-      access: ACCESS_ENUM.USER,
+      access: [ACCESS_ENUM.STUDENT, ACCESS_ENUM.TEACHER],
+    },
+  },
+  {
+    path: '/update/post',
+    name: '更新帖子',
+    component: AddPostView,
+    meta: {
+      access: [ACCESS_ENUM.STUDENT, ACCESS_ENUM.TEACHER],
+      hideInMenu: true,
     },
   },
   {
@@ -125,8 +134,24 @@ export const routes: Array<RouteRecordRaw> = [
     component: ViewPostView,
     props: true,
     meta: {
-      access: ACCESS_ENUM.USER,
+      access: [ACCESS_ENUM.STUDENT, ACCESS_ENUM.TEACHER],
       hideInMenu: true,
+    },
+  },
+  {
+    path: '/ai/chat',
+    name: 'AI聊天',
+    component: AiChat,
+    meta: {
+      access: [ACCESS_ENUM.STUDENT, ACCESS_ENUM.TEACHER],
+    },
+  },
+  {
+    path: '/user/center',
+    name: '个人中心',
+    component: UserCenter,
+    meta: {
+      access: [ACCESS_ENUM.STUDENT, ACCESS_ENUM.TEACHER],
     },
   },
   // {

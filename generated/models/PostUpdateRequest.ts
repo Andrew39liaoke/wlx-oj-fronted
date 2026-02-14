@@ -1,15 +1,16 @@
-/* generated using openapi-typescript-codegen -- do no edit */
+﻿/* generated using openapi-typescript-codegen -- do no edit */
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
 
 /**
- * 帖子
+ * 甯栧瓙
  */
 export type PostUpdateRequest = {
-    id: number;
-    title: string;
-    content: string;
-    zone: string;
-    tags: Array<string>;
+  id: number;
+  title: string;
+  content: string;
+  zone: string;
+  tags: Array<string>;
+  cover?: string;
 };

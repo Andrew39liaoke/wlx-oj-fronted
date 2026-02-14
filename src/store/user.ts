@@ -31,19 +31,22 @@ export default {
         });
       }
     },
+    async setToken({ commit }, token: string) {
+      // 单独提交 token 更新，不复用 updateUser
+      commit('setToken', token);
+    },
   },
   mutations: {
     updateUser(state, payload) {
       state.loginUser = payload;
-      // 如果 payload 中包含 token，自动设置 token
-      if (payload?.token) {
-        state.token = payload.token;
-        localStorage.setItem('token', payload.token);
-        // 使用 OpenAPI.HEADERS 代替 OpenAPI.TOKEN，以避免生成的代码自动添加 "Bearer " 前缀
-        OpenAPI.HEADERS = {
-          Authorization: payload.token,
-        };
-      }
+    },
+    setToken(state, token: string) {
+      state.token = token;
+      localStorage.setItem('token', token);
+      // 使用 OpenAPI.HEADERS 代替 OpenAPI.TOKEN，以避免生成的代码自动添加 "Bearer " 前缀
+      OpenAPI.HEADERS = {
+        Authorization: token,
+      };
     },
   },
 } as StoreOptions<any>;

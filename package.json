@@ -17,6 +17,7 @@
     "moment": "^2.29.4",
     "monaco-editor": "^0.41.0",
     "monaco-editor-webpack-plugin": "^7.1.0",
+    "vditor": "^3.11.2",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
     "vuex": "^4.0.0"

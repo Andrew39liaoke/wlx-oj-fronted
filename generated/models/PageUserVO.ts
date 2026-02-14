@@ -1,4 +1,4 @@
-/* generated using openapi-typescript-codegen -- do no edit */
+﻿/* generated using openapi-typescript-codegen -- do no edit */
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
@@ -7,30 +7,15 @@ import type { OrderItem } from './OrderItem';
 import type { UserVO } from './UserVO';
 
 export type PageUserVO = {
-    records?: Array<UserVO>;
-    total?: number;
-    size?: number;
-    current?: number;
-    /**
-     * @deprecated
-     */
-    orders?: Array<OrderItem>;
-    /**
-     * @deprecated
-     */
-    optimizeCountSql?: boolean;
-    /**
-     * @deprecated
-     */
-    searchCount?: boolean;
-    optimizeJoinOfCountSql?: boolean;
-    /**
-     * @deprecated
-     */
-    maxLimit?: number;
-    /**
-     * @deprecated
-     */
-    countId?: string;
-    pages?: number;
+  records?: Array<UserVO>;
+  total?: number;
+  size?: number;
+  current?: number;
+  orders?: Array<OrderItem>;
+  optimizeCountSql?: PageUserVO;
+  searchCount?: PageUserVO;
+  optimizeJoinOfCountSql?: boolean;
+  maxLimit?: number;
+  countId?: string;
+  pages?: number;
 };

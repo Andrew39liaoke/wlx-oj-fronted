@@ -25,8 +25,32 @@
       </a-menu>
     </a-col>
     <a-col flex="100px">
-      <div>
-        {{ store.state.user?.loginUser?.nickName ?? '未登录' }}
+      <div class="user-area">
+        <template v-if="isLoggedIn">
+          <div class="user-menu">
+            <div class="avatar-wrapper" @click="go('/user/center')">
+              <img
+                v-if="avatarUrl"
+                :src="avatarUrl"
+                alt="avatar"
+                class="avatar"
+              />
+              <div v-else class="avatar-initial">{{ nicknameInitial }}</div>
+            </div>
+            <div class="nickname" @click="go('/user/center')">
+              {{ nickname }}
+            </div>
+            <IconPoweroff class="logout-icon" @click.stop="handleLogout" />
+          </div>
+        </template>
+        <template v-else>
+          <div class="not-logged">
+            <a class="login-link" @click="go('/user/login')">
+              <IconMenu />
+              去登录
+            </a>
+          </div>
+        </template>
       </div>
     </a-col>
   </a-row>
@@ -36,17 +60,27 @@
 import { routes } from '../router/routes';
 import { useRoute, useRouter } from 'vue-router';
 import { computed, ref, watch } from 'vue';
+import { IconMenu, IconPoweroff } from '@arco-design/web-vue/es/icon';
 import { useStore } from 'vuex';
 import checkAccess from '@/access/checkAccess';
 import ACCESS_ENUM from '@/access/accessEnum';
+import { UserControllerService } from '../../generated';
 
 const router = useRouter();
 const route = useRoute();
 const store = useStore();
+const isLoggedIn = computed(() => !!store.state.user?.loginUser?.id);
+const avatarUrl = computed(() => store.state.user?.loginUser?.userAvatar || '');
+const nickname = computed(
+  () => store.state.user?.loginUser?.nickName || '未登录'
+);
+const nicknameInitial = computed(() =>
+  nickname.value ? nickname.value.charAt(0) : 'U'
+);
 
 // 展示在菜单的路由数组
 const visibleRoutes = computed(() => {
-  return routes.filter((item, index) => {
+  return routes.filter((item) => {
     if (item.meta?.hideInMenu) {
       return false;
     }
@@ -86,6 +120,21 @@ const doMenuClick = (key: string) => {
 
 const go = (path: string) => {
   router.push({ path });
+};
+const handleLogout = async () => {
+  // 调用后端登出接口
+  try {
+    await UserControllerService.logout();
+  } catch (e) {
+    // 忽略后端错误，继续执行本地登出
+  }
+  // Clear token and reset user state locally
+  localStorage.removeItem('token');
+  store.commit('user/setToken', '');
+  store.commit('user/updateUser', {
+    nickName: '未登录',
+    userRole: ACCESS_ENUM.NOT_LOGIN,
+  });
 };
 </script>
 
@@ -208,6 +257,101 @@ const go = (path: string) => {
   background: #0f0600;
   border-radius: 1px;
   display: block;
+}
+</style>
+
+<style scoped>
+/* User menu styles */
+.user-area {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.user-menu {
+  display: flex;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  padding: 4px;
+  gap: 8px;
+}
+.avatar-wrapper {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.avatar-initial {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #cfcfcf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 600;
+}
+.nickname {
+  font-size: 14px;
+  color: #333;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.logout-icon {
+  color: #ff4d4f;
+  cursor: pointer;
+  margin-left: 8px;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+}
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: 44px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(15, 20, 30, 0.06);
+  border-radius: 6px;
+  min-width: 140px;
+  padding: 8px 0;
+  z-index: 50;
+}
+.dropdown-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  color: #333;
+}
+.dropdown-item:hover {
+  background: #f5f5f5;
+}
+.not-logged {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Plain, unstyled login link used instead of Ant button to avoid button styles */
+.login-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-weight: 500;
 }
 </style>
 

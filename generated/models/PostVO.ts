@@ -1,4 +1,4 @@
-/* generated using openapi-typescript-codegen -- do no edit */
+﻿/* generated using openapi-typescript-codegen -- do no edit */
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
@@ -6,20 +6,21 @@
 import type { UserVO } from './UserVO';
 
 export type PostVO = {
-    id?: number;
-    title?: string;
-    content?: string;
-    thumbNum?: number;
-    favourNum?: number;
-    zone?: string;
-    viewNum?: number;
-    zoneName?: string;
-    userId?: number;
-    updater?: number;
-    createTime?: string;
-    updateTime?: string;
-    tagList?: Array<string>;
-    user?: UserVO;
-    hasThumb?: boolean;
-    hasFavour?: boolean;
+  id?: number;
+  title?: string;
+  content?: string;
+  thumbNum?: number;
+  favourNum?: number;
+  zone?: string;
+  viewNum?: number;
+  zoneName?: string;
+  userId?: number;
+  updater?: number;
+  createTime?: string;
+  updateTime?: string;
+  tagList?: Array<string>;
+  cover?: string;
+  user?: UserVO;
+  hasThumb?: boolean;
+  hasFavour?: boolean;
 };

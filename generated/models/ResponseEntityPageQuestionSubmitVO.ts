@@ -1,4 +1,4 @@
-/* generated using openapi-typescript-codegen -- do no edit */
+﻿/* generated using openapi-typescript-codegen -- do no edit */
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
@@ -6,7 +6,7 @@
 import type { PageQuestionSubmitVO } from './PageQuestionSubmitVO';
 
 export type ResponseEntityPageQuestionSubmitVO = {
-    code?: number;
-    data?: PageQuestionSubmitVO;
-    message?: string;
+  code?: number;
+  data?: PageQuestionSubmitVO;
+  message?: string;
 };

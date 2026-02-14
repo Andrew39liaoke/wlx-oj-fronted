@@ -2,9 +2,20 @@
   <div class="comment-item">
     <div class="comment-main">
       <div class="comment-avatar">
-        <a-avatar :size="40" :src="node.userVO?.userAvatar">
-          {{ node.userVO?.userName?.charAt(0)?.toUpperCase() }}
-        </a-avatar>
+        <div
+          class="user-avatar"
+          :style="{
+            backgroundImage: node.userVO?.userAvatar
+              ? `url(${node.userVO?.userAvatar})`
+              : 'none',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }"
+        >
+          <span v-if="!node.userVO?.userAvatar" class="avatar-fallback">
+            {{ node.userVO?.userName?.charAt(0)?.toUpperCase() }}
+          </span>
+        </div>
       </div>
       <div class="comment-body">
         <div class="comment-head">
@@ -221,5 +232,23 @@ const formatTime = (t?: string) => {
 }
 .btn-icon {
   margin-right: 6px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #f0f2f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.avatar-fallback {
+  font-weight: 600;
+  font-size: 16px;
+  color: #666;
 }
 </style>

@@ -14,7 +14,11 @@
               :class="{ active: selectedChips.includes(chip.key) }"
               :aria-pressed="selectedChips.includes(chip.key)"
             >
-              <component :is="chip.icon" class="chip-icon" :style="{ color: chip.color }" />
+              <component
+                :is="chip.icon"
+                class="chip-icon"
+                :style="{ color: chip.color }"
+              />
               <span class="chip-label">{{ chip.label }}</span>
             </div>
           </div>
@@ -30,12 +34,21 @@
               </template>
             </a-input>
           </div>
+          <!-- Right side: create button -->
+          <div class="search-right">
+            <a-button
+              class="create-btn"
+              shape="round"
+              @click="handleCreateClick"
+            >
+              <icon-plus class="create-icon" />
+              <span class="create-text">创作</span>
+            </a-button>
+          </div>
         </div>
 
         <!-- Posts list -->
-        <div
-          class="posts-container"
-        >
+        <div class="posts-container">
           <div
             v-for="post in dataList"
             :key="post.id"
@@ -47,19 +60,32 @@
               <div class="post-left">
                 <div class="avatar-top">
                   <div class="avatar-left">
-                    <a-avatar
-                      :size="40"
-                      :src="post.user?.userAvatar"
+                    <div
                       class="user-avatar"
+                      :style="{
+                        backgroundImage: post.user?.userAvatar
+                          ? `url(${post.user?.userAvatar})`
+                          : 'none',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }"
                     >
-                      {{ post.user?.userName?.charAt(0)?.toUpperCase() }}
-                    </a-avatar>
+                      <span
+                        v-if="!post.user?.userAvatar"
+                        class="avatar-fallback"
+                      >
+                        {{ post.user?.userName?.charAt(0)?.toUpperCase() }}
+                      </span>
+                    </div>
                     <span class="username">{{ post.user?.userName }}</span>
                   </div>
 
                   <!-- Place tags at the top-right of post-left -->
                   <div class="avatar-right">
-                    <div class="tag-list" v-if="post.tagList && post.tagList.length">
+                    <div
+                      class="tag-list"
+                      v-if="post.tagList && post.tagList.length"
+                    >
                       <span
                         v-for="(tag, idx) in post.tagList"
                         :key="`tag-${post.id}-${idx}`"
@@ -74,8 +100,9 @@
 
                 <div class="post-bottom">
                   <h3 class="post-title">{{ post.title }}</h3>
-                  <p class="post-preview">{{ post.content }}</p>
-
+                  <p class="post-preview">
+                    {{ markdownToPlainText(post.content) }}
+                  </p>
                   <div class="action-bar">
                     <div class="action-item">
                       <button
@@ -167,6 +194,7 @@ import {
   IconCommand,
   IconStorage,
   IconBranch,
+  IconPlus,
 } from '@arco-design/web-vue/es/icon';
 import message from '@arco-design/web-vue/es/message';
 import {
@@ -302,10 +330,49 @@ const getImageUrl = (post: PostVO) => {
   return `https://picsum.photos/seed/post-${seed}/320/200`;
 };
 
+// 简单的 markdown 转纯文本函数
+const markdownToPlainText = (markdown: string) => {
+  if (!markdown) return '';
+
+  return (
+    markdown
+      // 移除标题符号 (# ## ### 等)
+      .replace(/^#{1,6}\s+/gm, '')
+      // 移除粗体和斜体 (**text** 或 *text*)
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/\*([^*]+)\*/g, '$1')
+      // 移除代码块 (```code```)
+      .replace(/```[\s\S]*?```/g, '')
+      // 移除行内代码 (`code`)
+      .replace(/`([^`]+)`/g, '$1')
+      // 移除链接 [text](url)
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      // 移除图片 ![alt](url)
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '')
+      // 移除列表符号 (- * +)
+      .replace(/^[-*+]\s+/gm, '')
+      // 移除有序列表 (1. 2. 3.)
+      .replace(/^\d+\.\s+/gm, '')
+      // 移除多余的空行
+      .replace(/\n\s*\n/g, '\n')
+      // 移除首尾空白
+      .trim()
+  );
+};
+
 const handlePostClick = (post: PostVO) => {
   if (post.id) {
     router.push(`/view/post/${post.id}`);
   }
+};
+
+const handleCreateClick = () => {
+  if (!isLoggedIn.value) {
+    message.warning('请先登录');
+    router.push('/user/login');
+    return;
+  }
+  router.push('/add/post');
 };
 
 const handleThumb = async (post: PostVO) => {
@@ -441,6 +508,37 @@ onMounted(() => {
   width: 100%;
   max-width: 300px;
   border-radius: 24px;
+}
+
+.search-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.create-btn {
+  background: linear-gradient(180deg, #ff7a45 0%, #ff5a1f 100%);
+  border: none;
+  color: rgba(255, 255, 255, 0.9);
+  padding: 8px 14px;
+  font-weight: 600;
+  box-shadow: 0 6px 18px rgba(15, 20, 30, 0.08);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.create-btn:hover {
+  opacity: 0.95;
+}
+.create-icon {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 14px;
+  line-height: 1;
+}
+.create-text {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  line-height: 1;
 }
 
 .search-icon {
@@ -580,7 +678,21 @@ onMounted(() => {
 }
 
 .user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   border: 2px solid #f0f2f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.avatar-fallback {
+  font-weight: 600;
+  font-size: 16px;
+  color: #666;
 }
 
 .timestamp-section {
