@@ -9,4 +9,5 @@ export type ClassQueryRequest = {
   sortField?: string;
   sortOrder?: string;
   className?: string;
+  studentId?: number;
 };

@@ -132,6 +132,8 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
 import message from '@arco-design/web-vue/es/message';
 import {
@@ -148,6 +150,8 @@ import {
   ClassQueryRequest,
 } from '../../../generated';
 
+const store = useStore();
+const router = useRouter();
 const loading = ref(false);
 const dataList = ref<ClassVO[]>([]);
 const total = ref(0);
@@ -155,6 +159,7 @@ const searchParams = reactive<ClassQueryRequest>({
   current: 1,
   pageSize: 8, // Grid layout, 8 per page looks good
   className: '',
+  studentId: 0,
 });
 
 // Join Modal State
@@ -178,7 +183,11 @@ const onSearchInput = () => {
 const loadData = async () => {
   loading.value = true;
   try {
-    const res = await ClassControllerService.getClassPage(searchParams);
+    // 获取当前登录用户的ID
+    const loginUser = store.state.user.loginUser;
+    searchParams.studentId = loginUser?.id;
+
+    const res = await ClassControllerService.getStudentClasses(searchParams);
     if (res.code === 0 && res.data) {
       dataList.value = res.data.records || [];
       total.value = Number(res.data.total) || 0;
@@ -240,8 +249,7 @@ const handleJoin = async () => {
 };
 
 const enterClass = (item: ClassVO) => {
-  message.info(`正在进入班级: ${item.name}`);
-  // Future implementation: router.push(`/class/${item.id}`);
+  router.push(`/class/${item.id}`);
 };
 
 const showClassDetail = (item: ClassVO) => {

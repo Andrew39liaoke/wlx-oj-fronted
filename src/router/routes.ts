@@ -16,6 +16,7 @@ import ViewPostView from '@/views/post/ViewPostView.vue';
 import AddPostView from '@/views/post/AddPostView.vue';
 import RecommendView from '@/views/RecommendView.vue';
 import UserCenter from '@/views/UserCenter/UserCenter.vue';
+import ClassDetailView from '@/views/ClassDetail/ClassDetailView.vue';
 import AiChat from '@/views/AiChat.vue';
 export const routes: Array<RouteRecordRaw> = [
   {
@@ -152,6 +153,17 @@ export const routes: Array<RouteRecordRaw> = [
     component: UserCenter,
     meta: {
       access: [ACCESS_ENUM.STUDENT, ACCESS_ENUM.TEACHER],
+    },
+  },
+  {
+    path: '/class/:id',
+    name: '班级详情',
+    component: ClassDetailView,
+    props: true,
+    meta: {
+      access: [ACCESS_ENUM.STUDENT, ACCESS_ENUM.TEACHER],
+      hideInMenu: true,
+      hideHeader: true,
     },
   },
   // {

@@ -1,7 +1,7 @@
 <template>
   <div id="basicLayout">
     <a-layout style="min-height: 100vh">
-      <a-layout-header class="header">
+      <a-layout-header class="header" v-if="!hideHeader">
         <GlobalHeader />
       </a-layout-header>
       <a-layout-content class="content">
@@ -46,9 +46,16 @@
 }
 </style>
 <script>
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 import GlobalHeader from '@/components/GlobalHeader';
 
 export default {
   components: { GlobalHeader },
+  setup() {
+    const route = useRoute();
+    const hideHeader = computed(() => !!route.meta?.hideHeader);
+    return { hideHeader };
+  },
 };
 </script>

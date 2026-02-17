@@ -17,6 +17,7 @@ import { onMounted, ref, toRaw, withDefaults, defineProps, watch } from 'vue';
 interface Props {
   value: string;
   language?: string;
+  theme?: string;
   handleChange: (v: string) => void;
 }
 
@@ -26,6 +27,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   value: () => '',
   language: () => 'java',
+  theme: () => 'vs-dark',
   handleChange: (v: string) => {
     console.log(v);
   },
@@ -54,6 +56,28 @@ watch(
   }
 );
 
+watch(
+  () => props.theme,
+  () => {
+    if (codeEditor.value) {
+      monaco.editor.setTheme(props.theme);
+    }
+  }
+);
+
+watch(
+  () => props.value,
+  () => {
+    if (codeEditor.value) {
+      const editor = toRaw(codeEditor.value);
+      const currentValue = editor.getValue();
+      if (currentValue !== props.value) {
+        editor.setValue(props.value);
+      }
+    }
+  }
+);
+
 onMounted(() => {
   if (!codeEditorRef.value) {
     return;
@@ -68,7 +92,7 @@ onMounted(() => {
       enabled: true,
     },
     readOnly: false,
-    theme: 'vs-dark',
+    theme: props.theme,
     // lineNumbers: "off",
     // roundedSelection: false,
     // scrollBeyondLastLine: false,

@@ -109,6 +109,22 @@ export class ClassControllerService {
   }
 
   /**
+   * @param requestBody
+   * @returns ResponseEntityPageClassVO OK
+   * @throws ApiError
+   */
+  public static getStudentClasses(
+    requestBody: ClassQueryRequest
+  ): CancelablePromise<ResponseEntityPageClassVO> {
+    return __request(OpenAPI, {
+      method: 'POST',
+      url: '/api/auth/class/student/classes',
+      body: requestBody,
+      mediaType: 'application/json',
+    });
+  }
+
+  /**
    * @param invitationCode
    * @returns ResponseEntityBoolean OK
    * @throws ApiError
@@ -151,9 +167,7 @@ export class ClassControllerService {
     return __request(OpenAPI, {
       method: 'GET',
       url: '/api/auth/class/student/page',
-      query: {
-        classStudentQueryRequest: classStudentQueryRequest,
-      },
+      query: classStudentQueryRequest,
     });
   }
 

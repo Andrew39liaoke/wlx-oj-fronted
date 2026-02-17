@@ -1,196 +1,204 @@
 <template>
   <div id="viewQuestionView">
-    <a-row :gutter="[24, 24]">
-      <a-col :md="10" :xs="24" class="content-column" ref="contentColumnRef">
-        <a-tabs default-active-key="question" class="question-tabs">
-          <a-tab-pane key="question">
-            <template #title>
-              <div class="tab-title">
-                <icon-file class="tab-icon" />
-                <span>题目</span>
+    <!-- 左侧：题目信息面板 -->
+    <div class="left-panel" ref="leftPanelRef">
+      <a-tabs default-active-key="question" class="glass-tabs">
+        <a-tab-pane key="question">
+          <template #title>
+            <div class="tab-title">
+              <icon-file class="tab-icon" />
+              <span>题目</span>
+            </div>
+          </template>
+          <div v-if="question" class="question-detail">
+            <!-- 题目标题 + 标签 -->
+            <div class="question-header">
+              <h2 class="question-title">{{ question.title }}</h2>
+              <div class="tag-row" v-if="question.tags && question.tags.length">
+                <a-tag
+                  v-for="(tag, index) of question.tags"
+                  :key="index"
+                  class="glass-tag"
+                  >{{ tag }}</a-tag
+                >
               </div>
-            </template>
-            <a-card
-              v-if="question"
-              :title="question.title"
-              class="question-card"
-            >
-              <a-descriptions
-                title="判题条件"
-                :column="{ xs: 1, md: 2, lg: 3 }"
-              >
-                <a-descriptions-item>
-                  <template #label>
-                    <div class="limit-box">
-                      <div class="limit-item">
-                        <icon-clock-circle class="limit-icon" />
-                        <span class="limit-label">时间限制</span>
-                        <span class="limit-value">
-                          {{ question.judgeConfig?.timeLimit ?? 0 }}ms
-                        </span>
-                      </div>
-                    </div>
-                  </template>
-                </a-descriptions-item>
+            </div>
 
-                <a-descriptions-item>
-                  <template #label>
-                    <div class="limit-box">
-                      <div class="limit-item">
-                        <icon-cloud class="limit-icon" />
-                        <span class="limit-label">内存限制</span>
-                        <span class="limit-value">
-                          {{ question.judgeConfig?.memoryLimit ?? 0 }}mb
-                        </span>
-                      </div>
-                    </div>
-                  </template>
-                </a-descriptions-item>
+            <!-- 判题条件 -->
+            <div class="limit-bar">
+              <div class="limit-chip">
+                <icon-clock-circle class="chip-icon" />
+                <span class="chip-text"
+                  >{{ question.judgeConfig?.timeLimit ?? 0 }}ms</span
+                >
+              </div>
+              <div class="limit-chip">
+                <icon-cloud class="chip-icon" />
+                <span class="chip-text"
+                  >{{ question.judgeConfig?.memoryLimit ?? 0 }}MB</span
+                >
+              </div>
+              <div class="limit-chip">
+                <icon-menu class="chip-icon" />
+                <span class="chip-text"
+                  >{{ question.judgeConfig?.stackLimit ?? 0 }}KB</span
+                >
+              </div>
+            </div>
 
-                <a-descriptions-item>
-                  <template #label>
-                    <div class="limit-box">
-                      <div class="limit-item">
-                        <icon-menu class="limit-icon" />
-                        <span class="limit-label">堆栈限制</span>
-                        <span class="limit-value">
-                          {{ question.judgeConfig?.stackLimit ?? 0 }}kb
-                        </span>
-                      </div>
-                    </div>
-                  </template>
-                </a-descriptions-item>
-              </a-descriptions>
-              <!-- Question description header + rendered content (using bytemd Viewer directly for better control) -->
-              <div class="question-content">
-                <h3 class="question-content-title">题目描述</h3>
+            <!-- 题目描述 -->
+            <div class="section-block">
+              <h3 class="section-heading">题目描述</h3>
+              <div class="markdown-body">
                 <Viewer
                   :value="question.content || ''"
                   :plugins="viewerPlugins"
                 />
-                <!-- Judge case examples: show up to 3, or all if fewer than 3 -->
-                <div
-                  class="judge-cases"
-                  v-if="question?.judgeCase && question.judgeCase.length"
-                >
-                  <div
-                    v-for="(c, idx) in question.judgeCase.slice(
-                      0,
-                      Math.min(3, question.judgeCase.length)
-                    )"
-                    :key="idx"
-                    class="judge-case"
-                  >
-                    <div class="judge-case-title">示例{{ idx + 1 }}：</div>
-                    <div class="judge-case-body">
-                      <div class="judge-case-row">
-                        <span class="judge-case-label">输入：</span>
-                        <span class="judge-case-value">{{ c.input }}</span>
-                      </div>
-                      <div class="judge-case-row">
-                        <span class="judge-case-label">输出：</span>
-                        <span class="judge-case-value">{{ c.output }}</span>
-                      </div>
-                    </div>
-                  </div>
+              </div>
+            </div>
+
+            <!-- 样例 -->
+            <div
+              class="section-block"
+              v-if="question?.judgeCase && question.judgeCase.length"
+            >
+              <h3 class="section-heading">示例</h3>
+              <div
+                v-for="(c, idx) in question.judgeCase.slice(
+                  0,
+                  Math.min(3, question.judgeCase.length)
+                )"
+                :key="idx"
+                class="example-card"
+              >
+                <div class="example-label">示例 {{ idx + 1 }}</div>
+                <div class="example-row">
+                  <span class="example-key">输入</span>
+                  <pre class="example-value">{{ c.input }}</pre>
+                </div>
+                <div class="example-row">
+                  <span class="example-key">输出</span>
+                  <pre class="example-value">{{ c.output }}</pre>
                 </div>
               </div>
-              <template #extra>
-                <a-space wrap>
-                  <a-tag
-                    v-for="(tag, index) of question.tags"
-                    :key="index"
-                    color="green"
-                    >{{ tag }}
-                  </a-tag>
-                </a-space>
-              </template>
-            </a-card>
-          </a-tab-pane>
-          <a-tab-pane key="solution">
-            <template #title>
-              <div class="tab-title">
-                <icon-book class="tab-icon" />
-                <span>题解</span>
-              </div>
-            </template>
-            <div class="solution-content">
-              <a-empty description="题解内容正在准备中..." />
             </div>
-          </a-tab-pane>
-          <a-tab-pane key="submission">
-            <template #title>
-              <div class="tab-title">
-                <icon-history class="tab-icon" />
-                <span>提交记录</span>
-              </div>
-            </template>
-            <div class="submission-content">
-              <a-empty description="暂时无法查看提交记录" />
+          </div>
+        </a-tab-pane>
+        <a-tab-pane key="solution">
+          <template #title>
+            <div class="tab-title">
+              <icon-book class="tab-icon" />
+              <span>题解</span>
             </div>
-          </a-tab-pane>
-        </a-tabs>
-      </a-col>
-      <a-col :md="14" :xs="24" class="scroll-column code-column">
-        <a-form :model="form" layout="inline">
-          <a-form-item field="language" style="min-width: 240px">
-            <template #label>
-              <div class="form-label-with-icon">
-                <icon-code class="form-label-icon" />
-                <span>编程语言</span>
-              </div>
-            </template>
-            <div class="select-with-icon">
-              <a-select
-                v-model="form.language"
-                :style="{ width: '100px' }"
-                placeholder="选择编程语言"
-              >
-                <a-option value="java">
-                  <span class="lang-option">
-                    <icon-code class="lang-icon lang-icon-java" />
-                    java
-                  </span>
-                </a-option>
-                <a-option value="cpp">
-                  <span class="lang-option">
-                    <icon-thunderbolt class="lang-icon lang-icon-cpp" />
-                    cpp
-                  </span>
-                </a-option>
-                <a-option value="go">
-                  <span class="lang-option">
-                    <icon-robot class="lang-icon lang-icon-go" />
-                    go
-                  </span>
-                </a-option>
-                <a-option value="html">
-                  <span class="lang-option">
-                    <icon-link class="lang-icon lang-icon-html" />
-                    html
-                  </span>
-                </a-option>
-              </a-select>
+          </template>
+          <div class="empty-placeholder">
+            <a-empty description="题解内容正在准备中..." />
+          </div>
+        </a-tab-pane>
+        <a-tab-pane key="submission">
+          <template #title>
+            <div class="tab-title">
+              <icon-history class="tab-icon" />
+              <span>提交记录</span>
             </div>
-          </a-form-item>
-        </a-form>
+          </template>
+          <div class="empty-placeholder">
+            <a-empty description="暂时无法查看提交记录" />
+          </div>
+        </a-tab-pane>
+        <a-tab-pane key="ai-assistant">
+          <template #title>
+            <div class="tab-title">
+              <icon-robot class="tab-icon" />
+              <span>AI助手</span>
+            </div>
+          </template>
+          <div class="empty-placeholder">
+            <a-empty description="AI助手功能开发中，敬请期待..." />
+          </div>
+        </a-tab-pane>
+      </a-tabs>
+    </div>
+
+    <!-- 右侧：代码编辑区域 -->
+    <div class="right-panel">
+      <!-- 工具栏 -->
+      <div class="editor-toolbar">
+        <div class="toolbar-left">
+          <icon-code class="toolbar-icon" />
+          <span class="toolbar-label">编程语言</span>
+          <a-select
+            v-model="form.language"
+            :style="{ width: '120px' }"
+            placeholder="选择语言"
+            class="lang-select"
+          >
+            <a-option value="java">
+              <span class="lang-option">
+                <icon-code class="lang-icon lang-java" />
+                Java
+              </span>
+            </a-option>
+            <a-option value="cpp">
+              <span class="lang-option">
+                <icon-thunderbolt class="lang-icon lang-cpp" />
+                C++
+              </span>
+            </a-option>
+            <a-option value="go">
+              <span class="lang-option">
+                <icon-robot class="lang-icon lang-go" />
+                Go
+              </span>
+            </a-option>
+            <a-option value="html">
+              <span class="lang-option">
+                <icon-link class="lang-icon lang-html" />
+                HTML
+              </span>
+            </a-option>
+          </a-select>
+        </div>
+        <div class="toolbar-right">
+          <div
+            class="theme-switch"
+            @click="toggleCodeTheme"
+            role="button"
+            tabindex="0"
+          >
+            <div
+              class="switch-track"
+              :class="{ dark: codeTheme === 'vs-dark' }"
+            >
+              <div class="switch-knob">
+                <icon-moon v-if="codeTheme === 'vs-dark'" class="knob-icon" />
+                <icon-sun v-else class="knob-icon sun" />
+              </div>
+            </div>
+            <span class="switch-label">{{
+              codeTheme === 'vs-dark' ? '暗色' : '亮色'
+            }}</span>
+          </div>
+        </div>
+      </div>
+      <!-- 编辑器 -->
+      <div class="editor-area">
         <CodeEditor
           :value="form.code"
           :language="form.language"
+          :theme="codeTheme"
           :handle-change="changeCode"
         />
-        <a-button type="primary" class="submit-btn" @click="doSubmit">
+      </div>
+      <!-- 提交按钮 -->
+      <div class="submit-bar">
+        <a-button type="primary" class="submit-btn" @click="doSubmit" long>
           <template #icon>
             <icon-send />
           </template>
           提交代码
         </a-button>
-      </a-col>
-    </a-row>
-
-    <!-- Fixed visible scrollbar on the right edge that mirrors left content scroll -->
-    <div class="page-scrollbar" ref="pageScrollbarRef" aria-hidden="true">
-      <div class="page-scrollbar-track" ref="pageScrollbarTrackRef"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -202,8 +210,7 @@ import {
   withDefaults,
   defineProps,
   defineAsyncComponent,
-  nextTick,
-  onBeforeUnmount,
+  watch,
 } from 'vue';
 import message from '@arco-design/web-vue/es/message';
 const CodeEditor = defineAsyncComponent(
@@ -211,8 +218,6 @@ const CodeEditor = defineAsyncComponent(
 );
 import gfm from '@bytemd/plugin-gfm';
 import highlight from '@bytemd/plugin-highlight';
-// `Viewer` from bytemd may be a type-only export in some setups, so load it as
-// an async runtime component to avoid TS "only refers to a type" errors.
 const Viewer = defineAsyncComponent(() =>
   import('@bytemd/vue-next').then((m: any) => m.Viewer)
 );
@@ -222,6 +227,22 @@ import {
   QuestionSubmitAddRequest,
   QuestionVO,
 } from '../../../generated';
+
+import {
+  IconFile,
+  IconBook,
+  IconHistory,
+  IconSend,
+  IconClockCircle,
+  IconCloud,
+  IconMenu,
+  IconCode,
+  IconThunderbolt,
+  IconRobot,
+  IconLink,
+  IconSun,
+  IconMoon,
+} from '@arco-design/web-vue/es/icon';
 
 interface Props {
   id: number;
@@ -236,7 +257,6 @@ const viewerPlugins = [gfm(), highlight()];
 
 const loadData = async () => {
   const res = await QuestionControllerService.getQuestionVoById(props.id);
-  console.log('res', res);
   if (res.code === 0) {
     question.value = res.data;
   } else {
@@ -249,28 +269,70 @@ const form = ref<QuestionSubmitAddRequest>({
   code: '',
 });
 
-/**
- * 提交代码
- */
-import {
-  IconFile,
-  IconBook,
-  IconHistory,
-  IconSend,
-  IconClockCircle,
-  IconCloud,
-  IconMenu,
-  IconCode,
-  IconThunderbolt,
-  IconRobot,
-  IconLink,
-} from '@arco-design/web-vue/es/icon';
+const codeTheme = ref('vs');
+
+const LANGUAGE_TEMPLATES: Record<string, string> = {
+  java: `import java.util.Scanner;
+
+// 1:无需package
+// 2: 类名必须Main, 不可修改
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        //在此输入您的代码...
+        scan.close();
+    }
+}`,
+  cpp: `#include <iostream>
+using namespace std;
+int main()
+{
+  // 请在此输入您的代码
+  return 0;
+}
+`,
+  go: `package main
+
+import "fmt"
+
+func main() {
+    // 请在此输入您的代码
+    fmt.Println("Hello, World!")
+}
+`,
+  html: `<!DOCTYPE html>
+<html>
+<head>
+    <title>Hello</title>
+</head>
+<body>
+    <h1>Hello, World!</h1>
+</body>
+</html>
+`,
+};
+
+watch(
+  () => form.value.language,
+  (newLang) => {
+    if (newLang && LANGUAGE_TEMPLATES[newLang as string]) {
+      form.value.code = LANGUAGE_TEMPLATES[newLang as string];
+    } else {
+      form.value.code = '';
+    }
+  },
+  { immediate: true }
+);
+
+const toggleCodeTheme = () => {
+  codeTheme.value = codeTheme.value === 'vs-dark' ? 'vs' : 'vs-dark';
+};
 
 const doSubmit = async () => {
   if (!question.value?.id) {
     return;
   }
-
   const res = await QuestionControllerService.doQuestionSubmit({
     ...form.value,
     questionId: question.value.id,
@@ -282,9 +344,6 @@ const doSubmit = async () => {
   }
 };
 
-/**
- * 页面加载时，请求数据
- */
 onMounted(() => {
   loadData();
 });
@@ -293,852 +352,448 @@ const changeCode = (value: string) => {
   form.value.code = value;
 };
 
-// ---- custom scrollbar syncing between left content and the visible right scrollbar ----
-const contentColumnRef = ref<HTMLElement | null>(null);
-const pageScrollbarRef = ref<HTMLElement | null>(null);
-const pageScrollbarTrackRef = ref<HTMLElement | null>(null);
-
-let isSyncingFromContent = false;
-let isSyncingFromScrollbar = false;
-let resizeObserver: ResizeObserver | null = null;
-
-const resolveElement = (maybeComponentOrEl: any): HTMLElement | null => {
-  if (!maybeComponentOrEl) return null;
-  // Arco components (a-col) may return a component proxy with $el
-  if (maybeComponentOrEl.$el) return maybeComponentOrEl.$el as HTMLElement;
-  return maybeComponentOrEl as HTMLElement;
-};
-
-// guard helper: ensure we only operate on connected HTMLElements
-const isConnectedElement = (el: HTMLElement | null | undefined) =>
-  !!el && el.parentNode !== null && document.contains(el);
-
-const syncTrackSize = () => {
-  const rawContent = contentColumnRef.value;
-  const contentEl = resolveElement(rawContent);
-  const trackEl = pageScrollbarTrackRef.value;
-  const scrollEl = pageScrollbarRef.value;
-  if (!contentEl || !trackEl || !scrollEl) return;
-  if (
-    !isConnectedElement(contentEl) ||
-    !isConnectedElement(trackEl) ||
-    !isConnectedElement(scrollEl)
-  )
-    return;
-
-  // Batch DOM writes in rAF to avoid interfering with Vue's patching lifecycle.
-  // Also guard with try/catch to prevent exceptions from bubbling into Vue internals.
-  try {
-    window.requestAnimationFrame(() => {
-      // extra guard in the rAF callback because nodes may be removed between scheduling and execution
-      if (
-        !contentEl ||
-        !trackEl ||
-        !scrollEl ||
-        !isConnectedElement(contentEl) ||
-        !isConnectedElement(trackEl) ||
-        !isConnectedElement(scrollEl)
-      )
-        return;
-
-      trackEl.style.height = contentEl.scrollHeight + 'px';
-      (scrollEl as HTMLElement).style.height = contentEl.clientHeight + 'px';
-      scrollEl.scrollTop = contentEl.scrollTop;
-    });
-  } catch (e) {
-    // swallow - defensive: log in dev only
-    /* istanbul ignore next */
-    if (process && process.env && process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
-      console.warn('syncTrackSize failed safely:', e);
-    }
-  }
-};
-
-const onContentScroll = () => {
-  if (isSyncingFromScrollbar) return;
-  const rawContent = contentColumnRef.value;
-  const contentEl = resolveElement(rawContent);
-  const scrollEl = pageScrollbarRef.value;
-  if (!contentEl || !scrollEl) return;
-  if (!isConnectedElement(contentEl) || !isConnectedElement(scrollEl)) return;
-  try {
-    isSyncingFromContent = true;
-    scrollEl.scrollTop = contentEl.scrollTop;
-  } catch (e) {
-    /* istanbul ignore next */
-    if (process && process.env && process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
-      console.warn('onContentScroll failed safely:', e);
-    }
-  } finally {
-    // small timeout to release flag
-    window.setTimeout(() => (isSyncingFromContent = false), 0);
-  }
-};
-
-const onScrollbarScroll = () => {
-  if (isSyncingFromContent) return;
-  const rawContent = contentColumnRef.value;
-  const contentEl = resolveElement(rawContent);
-  const scrollEl = pageScrollbarRef.value;
-  if (!contentEl || !scrollEl) return;
-  if (!isConnectedElement(contentEl) || !isConnectedElement(scrollEl)) return;
-  try {
-    isSyncingFromScrollbar = true;
-    contentEl.scrollTop = scrollEl.scrollTop;
-  } catch (e) {
-    /* istanbul ignore next */
-    if (process && process.env && process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
-      console.warn('onScrollbarScroll failed safely:', e);
-    }
-  } finally {
-    window.setTimeout(() => (isSyncingFromScrollbar = false), 0);
-  }
-};
-
-onMounted(() => {
-  nextTick(() => {
-    const rawContent = contentColumnRef.value;
-    const contentEl = resolveElement(rawContent);
-    const scrollEl = pageScrollbarRef.value;
-    const trackEl = pageScrollbarTrackRef.value;
-    if (!contentEl || !scrollEl || !trackEl) return;
-    if (
-      !isConnectedElement(contentEl) ||
-      !isConnectedElement(scrollEl) ||
-      !isConnectedElement(trackEl)
-    )
-      return;
-
-    // initial sync
-    syncTrackSize();
-
-    // attach listeners (wrap in defensive try/catch)
-    try {
-      contentEl.addEventListener('scroll', onContentScroll, { passive: true });
-      scrollEl.addEventListener('scroll', onScrollbarScroll, { passive: true });
-    } catch (e) {
-      /* istanbul ignore next */
-      if (process && process.env && process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
-        console.warn('Failed to attach scroll listeners:', e);
-      }
-    }
-
-    // observe size changes of content to update track height
-    try {
-      resizeObserver = new ResizeObserver(() => {
-        syncTrackSize();
-      });
-      resizeObserver.observe(contentEl);
-    } catch (e) {
-      /* istanbul ignore next */
-      if (process && process.env && process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
-        console.warn('Failed to create ResizeObserver:', e);
-      }
-    }
-
-    // also update on window resize
-    try {
-      window.addEventListener('resize', syncTrackSize);
-    } catch (e) {
-      /* istanbul ignore next */
-      if (process && process.env && process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
-        console.warn('Failed to attach resize listener:', e);
-      }
-    }
-  });
-});
-
-onBeforeUnmount(() => {
-  try {
-    const contentEl = resolveElement(contentColumnRef.value);
-    const scrollEl = pageScrollbarRef.value;
-    if (contentEl && isConnectedElement(contentEl)) {
-      contentEl.removeEventListener('scroll', onContentScroll);
-    }
-    if (scrollEl && isConnectedElement(scrollEl)) {
-      scrollEl.removeEventListener('scroll', onScrollbarScroll);
-    }
-    if (resizeObserver && contentEl && isConnectedElement(contentEl)) {
-      resizeObserver.unobserve(contentEl);
-      resizeObserver.disconnect();
-    }
-    window.removeEventListener('resize', syncTrackSize);
-  } catch (e) {
-    /* istanbul ignore next */
-    if (process && process.env && process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
-      console.warn('Cleanup failed safely:', e);
-    }
-  }
-});
+const leftPanelRef = ref<HTMLElement | null>(null);
 </script>
 
 <style>
+/* ===== 全局背景 ===== */
 #viewQuestionView {
-  margin: 0 auto;
-  padding: 6px 28px 6px 6px; /* reserve right padding for custom scrollbar */
-  background-color: #ffffff;
+  display: flex;
+  height: calc(100vh - 60px);
+  gap: 0;
+  padding: 12px;
   box-sizing: border-box;
-  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    #e8eaf6 0%,
+    #c5cae9 30%,
+    #e3f2fd 60%,
+    #f3e5f5 100%
+  );
   position: relative;
+  overflow: hidden;
+}
+
+/* ===== 左侧面板 ===== */
+.left-panel {
+  flex: 0 0 42%;
+  max-width: 42%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+  box-sizing: border-box;
+  /* 自定义滚动条（在面板右缘，视觉上位于两面板之间） */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 130, 246, 0.35) transparent;
+}
+.left-panel::-webkit-scrollbar {
+  width: 6px;
+}
+.left-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+.left-panel::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.35);
+  border-radius: 3px;
+}
+.left-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.55);
+}
+
+/* ===== 右侧面板 ===== */
+.right-panel {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
-}
-
-/* layout above consolidates previous duplicated rules for #viewQuestionView */
-.scroll-column {
-  height: 100%;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  padding-left: 6px;
   box-sizing: border-box;
-  /* Ensure long words or code blocks wrap instead of creating horizontal scroll */
-  word-break: break-word;
+  overflow: hidden; /* 右侧整体不滚动 */
 }
 
-/* Wrap markdown/code blocks to avoid horizontal scrolling */
-.scroll-column pre,
-.scroll-column code,
-.scroll-column .markdown,
-.scroll-column .md-viewer {
-  white-space: pre-wrap !important;
-  word-break: break-word !important;
-  overflow-wrap: anywhere;
+/* ===== 玻璃 Tabs ===== */
+.glass-tabs {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  padding: 0;
+  overflow: hidden;
 }
-
-/* Prevent card/descriptions from causing horizontal overflow */
-#viewQuestionView .arco-card,
-#viewQuestionView .arco-descriptions {
-  max-width: 100%;
-  box-sizing: border-box;
+.glass-tabs .arco-tabs-nav {
+  padding: 6px 4px 0;
 }
-
-#viewQuestionView .arco-space-horizontal .arco-space-item {
-  margin-bottom: 0 !important;
-}
-
-/* min-height handled above; avoid duplicated/conflicting calc() rules */
-
-/* .scroll-column consolidated above */
-
-/* Left content column: scroll internally, hide its scrollbar visually */
-.content-column {
-  height: 100%;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  box-sizing: border-box;
-  /* ensure vertical scroll doesn't cause page scrollbar */
-  -webkit-overflow-scrolling: touch;
-  /* ensure card bottom border can be fully visible when content scrolls */
-  padding-bottom: 48px;
-  /* allow showing a thin, user-visible scrollbar on the left content column */
-  -ms-overflow-style: auto; /* IE and Edge: show scrollbar */
-  scrollbar-width: thin; /* Firefox: thin scrollbar */
-}
-.content-column::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-.content-column::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: 6px;
-}
-.content-column::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.12);
-  border-radius: 6px;
-}
-
-/* Code column: keep layout fixed (no horizontal shift), allow internal scrolling */
-.code-column {
-  position: relative;
-  height: 100%;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  /* show a thin scrollbar for code area as well */
-  -ms-overflow-style: auto;
-  scrollbar-width: thin;
-}
-.code-column::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-.code-column::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: 6px;
-}
-.code-column::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.12);
-  border-radius: 6px;
-}
-
-/* Root container overflow controlled by column scrolls; top-level overflow not forced here */
-
-/* Fixed visible scrollbar on the right edge that mirrors left content scroll.
-   The track height is set dynamically to mirror the content column's scrollHeight. */
-.page-scrollbar {
-  /* position the scrollbar inside the view container so it aligns with content */
-  position: absolute;
-  top: 0;
-  right: 8px;
-  bottom: 0;
-  width: 12px;
-  overflow-y: auto;
-  /* reduce stacking so content (cards) are not visually covered by this track */
-  z-index: 10;
-  background: transparent;
-  pointer-events: auto;
-}
-.page-scrollbar-track {
-  width: 1px;
-  background: transparent;
-}
-.page-scrollbar::-webkit-scrollbar {
-  width: 10px;
-}
-.page-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: 6px;
-}
-.page-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.18);
-  border-radius: 6px;
-}
-.page-scrollbar {
-  -ms-overflow-style: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.18) rgba(0, 0, 0, 0.03);
-}
-
-.arco-card-size-medium .arco-card-header {
-  height: 46px;
-  padding: 10px;
-}
-/* Tab styling */
-.question-tabs {
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 0px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+.glass-tabs .arco-tabs-content {
+  padding: 0 16px 16px;
 }
 
 .tab-title {
   display: flex;
   align-items: center;
-  gap: 0px;
-  font-weight: 500;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #1e293b;
+  transition: color 0.2s;
 }
-
+.tab-title:hover {
+  color: #3b82f6;
+}
 .tab-icon {
-  color: #1d2129;
-  font-size: 16px;
+  font-size: 15px;
 }
 
-.tab-title:hover .tab-icon {
-  color: #165dff;
-  transition: color 0.2s ease;
+/* ===== 题目详情 ===== */
+.question-detail {
+  padding: 4px 0;
 }
 
-/* Card styling */
-.question-card {
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e5e6eb;
-  background: #ffffff;
-  /* ensure the card (and its bottom border) is rendered above overlays
-     such as the custom scrollbar and has a small bottom gap so the border
-     is never flush against the scroll container edge. */
-  position: relative;
-  z-index: 20;
-  margin-bottom: 12px;
+.question-header {
+  margin-bottom: 16px;
 }
-
-.question-card:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  transition: box-shadow 0.3s ease;
+.question-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.3px;
 }
-.arco-card-size-medium .arco-card-body {
-  padding: 0px;
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
-/* Submit button styling */
-.submit-btn {
-  min-width: 200px;
-  height: 44px;
-  font-size: 16px;
+.glass-tag {
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #3b82f6 !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  border-radius: 6px !important;
   font-weight: 500;
-  border-radius: 6px;
+  font-size: 12px;
+  backdrop-filter: blur(4px);
+}
+
+/* ===== 判题条件 Chips ===== */
+.limit-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.limit-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
   transition: all 0.2s ease;
+}
+.limit-chip:hover {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+.chip-icon {
+  font-size: 14px;
+  color: #3b82f6;
+}
+.chip-text {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== 区块 ===== */
+.section-block {
+  margin-bottom: 20px;
+}
+.section-heading {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 10px 0;
+  padding-bottom: 6px;
+  border-bottom: 2px solid rgba(59, 130, 246, 0.15);
+  display: inline-block;
+}
+
+/* Markdown 渲染区域 */
+.markdown-body {
+  font-size: 14px;
+  color: #334155;
+  line-height: 1.75;
+}
+.markdown-body pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 12px 16px;
+  border-radius: 10px;
+  overflow-x: auto;
+  font-size: 13px;
+}
+.markdown-body code {
+  background: rgba(59, 130, 246, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  font-size: 13px;
+}
+
+/* ===== 样例卡片 ===== */
+.example-card {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+.example-label {
+  font-weight: 700;
+  font-size: 13px;
+  color: #3b82f6;
+  margin-bottom: 8px;
+}
+.example-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.example-key {
+  font-weight: 600;
+  font-size: 13px;
+  color: #64748b;
+  min-width: 32px;
+  flex-shrink: 0;
+}
+.example-value {
+  margin: 0;
+  padding: 4px 10px;
+  background: rgba(15, 23, 42, 0.04);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  color: #1e293b;
+  white-space: pre-wrap;
+  word-break: break-word;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ===== 空状态 ===== */
+.empty-placeholder {
+  padding: 48px 24px;
+  text-align: center;
+}
+
+/* ===== 编辑器工具栏 ===== */
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 2px 12px rgba(31, 38, 135, 0.04);
+  flex-shrink: 0;
+}
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toolbar-icon {
+  font-size: 16px;
+  color: #3b82f6;
+}
+.toolbar-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 语言选择器 */
+.lang-select .arco-select-view-single {
+  border-radius: 8px !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+}
+.lang-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.lang-icon {
+  font-size: 14px;
+}
+.lang-java {
+  color: #ed8b00;
+}
+.lang-cpp {
+  color: #00599c;
+}
+.lang-go {
+  color: #00add8;
+}
+.lang-html {
+  color: #e34f26;
+}
+
+/* ===== 主题切换 ===== */
+.theme-switch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: all 0.25s ease;
+}
+.theme-switch:hover {
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+.switch-track {
+  width: 36px;
+  height: 18px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  position: relative;
+  transition: background 0.3s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+.switch-track.dark {
+  background: linear-gradient(135deg, #1e293b, #334155);
+}
+.switch-knob {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.switch-track.dark .switch-knob {
+  left: 20px;
+  background: #475569;
+}
+.knob-icon {
+  font-size: 9px;
+  color: #fbbf24;
+}
+.knob-icon.sun {
+  color: #f59e0b;
+}
+.switch-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  user-select: none;
+}
+
+/* ===== 编辑器区域 ===== */
+.editor-area {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-left: 1px solid rgba(255, 255, 255, 0.6);
+  border-right: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.25);
+}
+.editor-area #code-editor {
+  height: 100% !important;
+  min-height: 100% !important;
+}
+
+/* ===== 提交栏 ===== */
+.submit-bar {
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 0 0 14px 14px;
+  border-top: none;
+  flex-shrink: 0;
+}
+.submit-btn {
+  height: 40px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+  transition: all 0.25s ease;
   cursor: pointer;
 }
-
 .submit-btn:hover {
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(22, 93, 255, 0.2);
 }
-
 .submit-btn:active {
   transform: translateY(0);
 }
 
-/* Form label with icon styling */
-.form-label-with-icon {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 500;
-  color: #1d2129;
+/* ===== Arco 组件覆写 ===== */
+#viewQuestionView .arco-card,
+#viewQuestionView .arco-descriptions {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+#viewQuestionView .arco-tabs-nav-tab {
+  gap: 4px;
 }
 
-.form-label-icon {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-size: 18px;
-  font-weight: 600;
-  filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
-}
-
-/* Form styling */
-.a-form-item {
-  margin-bottom: 16px;
-}
-
-.a-select {
-  border-radius: 6px;
-}
-
-.a-select:hover {
-  border-color: #165dff;
-}
-
-/* language option icon styles */
-.lang-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.lang-icon {
-  font-size: 14px;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-}
-
-/* Language-specific icon colors */
-.lang-icon-java {
-  color: #ed8b00; /* Orange for Java (coffee) */
-}
-.lang-icon-cpp {
-  color: #00599c; /* Blue for C++ */
-}
-.lang-icon-go {
-  color: #00add8; /* Cyan for Go */
-}
-.lang-icon-html {
-  color: #e34f26; /* Red for HTML */
-}
-
-/* Selected collapsed select: overlay icon + label inside the select control */
-.select-with-icon {
-  position: relative;
-  display: inline-block;
-  vertical-align: middle;
-}
-.selected-lang-display {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  pointer-events: none; /* let clicks reach the select */
-}
-.select-with-icon .arco-select-selection {
-  padding-left: 44px !important; /* leave space for the overlay icon */
-  display: flex;
-  align-items: center;
-}
-.selected-lang-label {
-  color: #0f172a;
-  font-weight: 500;
-  pointer-events: none;
-}
-.lang-icon.selected {
-  font-size: 14px;
-  line-height: 1;
-}
-
-/* Hide the overlayed selected display when the select is open or focused
-   to avoid overlapping the dropdown options. Also ensure the dropdown
-   appears above the overlay if needed. Cover common Arco select open
-   class names (`arco-select-open` and `is-open`) and focus-within. */
-.select-with-icon .arco-select.arco-select-open .selected-lang-display,
-.select-with-icon .arco-select.is-open .selected-lang-display,
-.select-with-icon .arco-select:focus-within .selected-lang-display {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-/* Content areas styling */
-.solution-content,
-.submission-content {
-  padding: 24px;
-  text-align: center;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e5e6eb;
-}
-
-/* Tag styling */
-.a-tag {
-  font-weight: 500;
-  border-radius: 4px;
-}
-
-/* Descriptions styling */
-.a-descriptions {
-  /* remove boxed background so descriptions blend with page */
-  background: transparent;
-  padding: 8px 0;
-  border-radius: 0;
-  margin-bottom: 12px;
-  border: none;
-}
-
-.a-descriptions-item {
-  padding: 8px 0;
-}
-
-.a-descriptions-item-label {
-  font-weight: 500;
-  color: #1d2129;
-}
-
-.a-descriptions-item-content {
-  color: #165dff;
-  font-weight: 600;
-}
-
-/* Responsive adjustments */
+/* ===== 响应式 ===== */
 @media (max-width: 768px) {
   #viewQuestionView {
-    padding: 16px;
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    padding: 8px;
   }
-
-  .question-tabs {
-    padding: 12px;
+  .left-panel {
+    flex: none;
+    max-width: 100%;
+    height: auto;
+    max-height: 50vh;
+    padding-right: 0;
+    margin-bottom: 8px;
   }
-
-  .tab-title {
-    font-size: 14px;
+  .right-panel {
+    flex: none;
+    height: 60vh;
+    padding-left: 0;
   }
-}
-
-/* Glassmorphism and icon styles for judge limits */
-.label-with-icon {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #475569;
-  font-weight: 500;
-}
-.label-with-icon .limit-icon {
-  /* smaller icons for a compact row layout */
-  width: 20px;
-  height: 20px;
-  color: #165dff;
-  flex: 0 0 20px;
-}
-.limit-card {
-  display: inline-flex;
-  flex-direction: row; /* keep number and unit on the same line */
-  align-items: center;
-  justify-content: center;
-  min-width: 60px;
-  padding: 4px 8px;
-  border-radius: 12px;
-  color: #0f172a;
-  font-weight: 700;
-  /* blue gradient glass */
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 24px rgba(9, 30, 66, 0.06);
-}
-.limit-number {
-  /* numeric value size for compact UI */
-  font-size: 14px;
-  line-height: 1;
-  color: #071133;
-  font-weight: 800;
-  text-align: left;
-}
-.limit-unit {
-  color: rgba(7, 17, 51, 0.6);
-  font-weight: 600;
-  margin-top: 0;
-  margin-left: 6px;
-  font-size: 14px;
-}
-.limit-box {
-  display: inline-flex;
-  flex-direction: row; /* put label and value on the same line */
-  align-items: center;
-  gap: 8px;
-  padding: 6px;
-  border-radius: 14px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: 0 10px 30px rgba(9, 30, 66, 0.08);
-}
-.limit-box .label-with-icon {
-  gap: 10px;
-  color: #0f172a;
-  font-weight: 600;
-}
-.limit-box .limit-card {
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  min-width: auto;
-  margin-left: 0;
-}
-/* reduce spacing so three cards can fit in one row on smaller widths */
-.a-descriptions {
-  padding: 12px;
-}
-.a-descriptions-item {
-  padding: 6px 0;
-}
-
-/* merged label+value row for time/memory/stack */
-.limit-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 400; /* normal weight per request */
-  /* allow label/value to wrap to next line when space is limited */
-  flex-wrap: nowrap;
-  min-width: 0;
-}
-.limit-item .limit-icon {
-  /* smaller icons for a compact row layout */
-  width: 16px;
-  height: 16px;
-  color: #165dff;
-  flex: 0 0 16px;
-  margin-right: 2px;
-}
-.limit-item .limit-label {
-  font-size: 13px;
-  color: #0f172a;
-  font-weight: 400;
-}
-.limit-item .limit-value {
-  font-size: 12px;
-  color: #071133;
-  font-weight: 400;
-  margin-left: 4px;
-  /* ensure long values wrap to next line instead of overflowing */
-  white-space: nowrap;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-  min-width: 0;
-}
-/* make sure the outer box can shrink and allow wrapping when needed */
-.limit-box {
-  min-width: 0;
-  max-width: 260px;
-}
-
-/* Ensure question content (markdown) wraps and does not cause horizontal overflow */
-.question-card .md-viewer,
-.question-card .markdown,
-.question-card pre,
-.question-card code {
-  white-space: pre-wrap !important;
-  word-break: break-word !important;
-  overflow-wrap: anywhere !important;
-}
-
-/* Allow description labels/contents and limit items to shrink and wrap */
-.a-descriptions-item-label,
-.a-descriptions-item-content,
-.limit-box,
-.limit-item {
-  min-width: 0;
-  word-break: break-word;
-}
-
-/* Ensure label and value remain on a single line inside description labels */
-.a-descriptions-item-label .limit-box,
-.a-descriptions-item-label .limit-item {
-  display: inline-flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: nowrap;
-  white-space: nowrap;
-  overflow: visible;
-}
-
-/* Ensure card body can expand vertically and not clip content */
-.question-card .arco-card-body {
-  overflow: visible;
-}
-
-/* Left-align question description content and align with section heading */
-.question-card .md-viewer,
-.question-card .markdown {
-  text-align: left;
-  margin: 0;
-  padding: 0 12px 16px 12px;
-  display: block;
-  box-sizing: border-box;
-  max-width: 100%;
-}
-.question-card pre,
-.question-card code {
-  text-align: left;
-  white-space: pre-wrap !important;
-}
-
-/* Styling for the custom question content area to look high-end */
-.question-content {
-  /* make question description visually inline with descriptions (no box) */
-  background: transparent;
-  border-radius: 0;
-  padding: 0;
-  margin-top: 8px;
-  box-shadow: none;
-  border: none;
-  text-align: left;
-}
-.question-content-title {
-  margin: 0 0 8px 0;
-  font-size: 14px;
-  color: #1d2129;
-  font-weight: 500;
-  letter-spacing: 0;
-}
-
-/* unify font/alignment between judge condition descriptions and question description */
-.a-descriptions,
-.question-content {
-  font-size: 14px;
-  color: #1d2129;
-  text-align: left;
-}
-
-/* Ensure Arco-generated description title/labels use the same sizing and alignment */
-.arco-descriptions,
-.arco-descriptions-title,
-.arco-descriptions-header,
-.arco-descriptions .arco-descriptions-title,
-.arco-descriptions .arco-descriptions-item-label,
-.arco-descriptions .arco-descriptions-item-content {
-  font-size: 14px !important;
-  color: #1d2129 !important;
-  text-align: left !important;
-}
-.arco-descriptions .arco-descriptions-title,
-.arco-descriptions-title {
-  margin: 0 0 8px 0 !important;
-  font-weight: 500 !important;
-}
-.arco-descriptions .arco-descriptions-item-label {
-  font-weight: 500 !important;
-  color: #1d2129 !important;
-}
-.arco-descriptions .arco-descriptions-item-content {
-  color: #1d2129 !important;
-  font-weight: 400 !important;
-}
-.question-content :is(.bytemd, .bytemd-viewer) {
-  font-size: 14px;
-  color: #334155;
-  line-height: 1.7;
-}
-.question-content pre {
-  background: #0b1220;
-  color: #e6eef8;
-  padding: 12px;
-  border-radius: 8px;
-  overflow: auto;
-}
-.question-content code {
-  background: rgba(15, 23, 42, 0.06);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono',
-    'Courier New', monospace;
-}
-
-/* Judge case examples styling — match question description typography */
-.judge-cases {
-  margin-top: 12px;
-  font-size: 14px;
-  color: #1d2129;
-  text-align: left;
-  /* remove internal padding so we can control exact alignment via body margin */
-  padding-left: 0;
-}
-.judge-cases-note {
-  margin: 0 0 8px 0;
-  color: #1d2129;
-  font-size: 14px;
-}
-.judge-case {
-  margin-bottom: 14px;
-}
-.judge-case-title {
-  font-weight: 500;
-  color: #1d2129;
-  margin-bottom: 12px;
-}
-.judge-case-body {
-  padding: 12px;
-  /* position the body so its left edge aligns with question description (12px) */
-  margin-left: 12px;
-  /* subtle translucent gray vertical line on the left, only for the body */
-  border-left: 3px solid rgba(15, 23, 42, 0.06);
-  border-radius: 6px;
-  background: transparent;
-}
-.judge-case-row {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  color: #1d2129;
-  font-size: 14px;
-}
-.judge-case-label {
-  font-weight: 600;
-  min-width: 48px;
-}
-.judge-case-value {
-  font-weight: 400;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-/* Make section headings and labels bold for better emphasis */
-.arco-descriptions .arco-descriptions-title,
-.question-content-title,
-.judge-case-title,
-.a-descriptions-item-label,
-.judge-case-label {
-  font-weight: 700 !important;
 }
 </style>
