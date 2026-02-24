@@ -5,6 +5,7 @@
 import type { ClassQueryRequest } from '../models/ClassQueryRequest';
 import type { ClassQuestionQueryRequest } from '../models/ClassQuestionQueryRequest';
 import type { ClassStudentQueryRequest } from '../models/ClassStudentQueryRequest';
+import type { ClassTeacherQueryRequest } from '../models/ClassTeacherQueryRequest';
 import type { QuestionAddRequest } from '../models/QuestionAddRequest';
 import type { ResponseEntityBoolean } from '../models/ResponseEntityBoolean';
 import type { ResponseEntityListMapStringObject } from '../models/ResponseEntityListMapStringObject';
@@ -12,6 +13,8 @@ import type { ResponseEntityLong } from '../models/ResponseEntityLong';
 import type { ResponseEntityPageClassVO } from '../models/ResponseEntityPageClassVO';
 import type { ResponseEntityPageQuestionVO } from '../models/ResponseEntityPageQuestionVO';
 import type { ResponseEntityPageUser } from '../models/ResponseEntityPageUser';
+
+import type { ClassStudentRemoveRequest } from '../models/ClassStudentRemoveRequest';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -157,17 +160,18 @@ export class ClassControllerService {
   }
 
   /**
-   * @param classStudentQueryRequest
+   * @param requestBody
    * @returns ResponseEntityPageUser OK
    * @throws ApiError
    */
   public static getClassStudentPage(
-    classStudentQueryRequest: ClassStudentQueryRequest
+    requestBody: ClassStudentQueryRequest
   ): CancelablePromise<ResponseEntityPageUser> {
     return __request(OpenAPI, {
-      method: 'GET',
+      method: 'POST',
       url: '/api/auth/class/student/page',
-      query: classStudentQueryRequest,
+      body: requestBody,
+      mediaType: 'application/json',
     });
   }
 
@@ -185,6 +189,75 @@ export class ClassControllerService {
       query: {
         classId: classId,
       },
+    });
+  }
+
+  /**
+   * @param classId
+   * @param questionId
+   * @returns Record<string, any> OK
+   * @throws ApiError
+   */
+  public static getClassQuestionSubmitStats(
+    classId: number,
+    questionId: number
+  ): CancelablePromise<Record<string, any>> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/auth/class/question/submit/stats',
+      query: {
+        classId: classId,
+        questionId: questionId,
+      },
+    });
+  }
+
+  /**
+   * @param requestBody
+   * @returns ResponseEntityPageClassVO OK
+   * @throws ApiError
+   */
+  public static getTeacherClasses(
+    requestBody: ClassTeacherQueryRequest
+  ): CancelablePromise<ResponseEntityPageClassVO> {
+    return __request(OpenAPI, {
+      method: 'POST',
+      url: '/api/auth/class/my/create/page',
+      body: requestBody,
+      mediaType: 'application/json',
+    });
+  }
+
+  /**
+   * @param classIds
+   * @returns ResponseEntityBoolean OK
+   * @throws ApiError
+   */
+  public static deleteClass(
+    classIds: Array<number>
+  ): CancelablePromise<ResponseEntityBoolean> {
+    return __request(OpenAPI, {
+      method: 'POST',
+      url: '/api/auth/class/delete',
+      query: {
+        classIds: classIds,
+      },
+    });
+  }
+
+  /**
+   * @param requestBody
+   * @returns ResponseEntityBoolean OK
+   * @throws ApiError
+   */
+  public static removeClassStudent(
+    requestBody: ClassStudentRemoveRequest
+  ): CancelablePromise<ResponseEntityBoolean> {
+    return __request(OpenAPI, {
+      method: 'POST',
+      url: '/api/auth/class/student/remove',
+      body: requestBody,
+      mediaType: 'application/json',
     });
   }
 }

@@ -7,4 +7,8 @@ export type JudgeInfo = {
   message?: string;
   memory?: number;
   time?: number;
+  passCaseCount?: number;
+  totalCaseCount?: number;
+  passRate?: number;
+  score?: number;
 };

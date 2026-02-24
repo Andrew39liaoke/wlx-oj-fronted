@@ -10,6 +10,8 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 export type { ClassQueryRequest } from './models/ClassQueryRequest';
 export type { ClassQuestionQueryRequest } from './models/ClassQuestionQueryRequest';
 export type { ClassStudentQueryRequest } from './models/ClassStudentQueryRequest';
+export type { ClassStudentRemoveRequest } from './models/ClassStudentRemoveRequest';
+export type { ClassTeacherQueryRequest } from './models/ClassTeacherQueryRequest';
 export type { ClassVO } from './models/ClassVO';
 export type { DeleteRequest } from './models/DeleteRequest';
 export type { FileInfo } from './models/FileInfo';

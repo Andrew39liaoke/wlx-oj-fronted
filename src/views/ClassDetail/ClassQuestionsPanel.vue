@@ -25,7 +25,7 @@
         class="questions-table"
       >
         <template #columns>
-          <a-table-column title="题目标题" :width="320">
+          <a-table-column title="题目标题" :width="240" align="left">
             <template #cell="{ record }">
               <a
                 class="question-link"
@@ -36,17 +36,22 @@
               </a>
             </template>
           </a-table-column>
-          <a-table-column title="难度" :width="120">
+          <a-table-column title="标签" :width="260" align="left">
             <template #cell="{ record }">
-              <a-tag
-                :color="getDifficultyColor(record.difficulty)"
-                size="small"
-              >
-                {{ getDifficultyText(record.difficulty) }}
-              </a-tag>
+              <a-space wrap v-if="record.tags && record.tags.length">
+                <a-tag
+                  v-for="(tag, index) in record.tags.slice(0, 3)"
+                  :key="index"
+                  color="blue"
+                  size="small"
+                >
+                  {{ tag }}
+                </a-tag>
+              </a-space>
+              <span v-else>无标签</span>
             </template>
           </a-table-column>
-          <a-table-column title="通过率" :width="150">
+          <a-table-column title="通过率" :width="150" align="left">
             <template #cell="{ record }">
               <div class="pass-rate-wrap">
                 <a-progress
@@ -63,12 +68,17 @@
               </div>
             </template>
           </a-table-column>
-          <a-table-column title="提交数" data-index="submitNum" :width="100">
+          <a-table-column
+            title="提交数"
+            data-index="submitNum"
+            :width="100"
+            align="left"
+          >
             <template #cell="{ record }">
-              <span class="submit-count">{{ record.submitNum || 0 }}</span>
+              <span class="submit-count">{{ record.classSubmitNum || 0 }}</span>
             </template>
           </a-table-column>
-          <a-table-column title="操作" :width="120" align="center">
+          <a-table-column title="操作" :width="120" align="left">
             <template #cell="{ record }">
               <a-button
                 type="primary"
@@ -101,7 +111,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { IconSearch } from '@arco-design/web-vue/es/icon';
 import message from '@arco-design/web-vue/es/message';
@@ -110,6 +120,7 @@ import {
   ClassQuestionQueryRequest,
 } from '../../../generated';
 
+// eslint-disable-next-line no-undef
 const props = defineProps<{
   classId: number;
 }>();
@@ -143,6 +154,7 @@ const loadData = async () => {
     if (res.code === 0 && res.data) {
       dataList.value = res.data.records || [];
       total.value = Number(res.data.total) || 0;
+      await loadClassSubmitStats();
     } else {
       message.error(`加载失败: ${res.message}`);
     }
@@ -152,6 +164,25 @@ const loadData = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const loadClassSubmitStats = async () => {
+  if (!dataList.value || dataList.value.length === 0) return;
+  const promises = dataList.value.map(async (record) => {
+    try {
+      const res = await ClassControllerService.getClassQuestionSubmitStats(
+        props.classId,
+        record.id
+      );
+      if (res.code === 0 && res.data) {
+        record.classSubmitNum = res.data.classSubmitNum || 0;
+        record.classAcceptedNum = res.data.classAcceptedNum || 0;
+      }
+    } catch (e) {
+      console.error(`加载题目 ${record.id} 的提交统计失败`, e);
+    }
+  });
+  await Promise.all(promises);
 };
 
 const onPageChange = (page: number) => {
@@ -169,35 +200,9 @@ const goToQuestion = (record: any) => {
   router.push(`/view/question/${record.id}`);
 };
 
-const getDifficultyText = (difficulty?: number) => {
-  switch (difficulty) {
-    case 0:
-      return '简单';
-    case 1:
-      return '中等';
-    case 2:
-      return '困难';
-    default:
-      return '未知';
-  }
-};
-
-const getDifficultyColor = (difficulty?: number) => {
-  switch (difficulty) {
-    case 0:
-      return 'green';
-    case 1:
-      return 'orangered';
-    case 2:
-      return 'red';
-    default:
-      return 'gray';
-  }
-};
-
 const getPassRate = (record: any) => {
-  const submit = record.submitNum || 0;
-  const accepted = record.acceptedNum || 0;
+  const submit = record.classSubmitNum || 0;
+  const accepted = record.classAcceptedNum || 0;
   if (submit === 0) return 0;
   return accepted / submit;
 };
@@ -258,6 +263,12 @@ onMounted(() => {
   padding: 0 8px;
 }
 
+.questions-table :deep(.arco-table-th),
+.questions-table :deep(.arco-table-td) {
+  padding: 14px 20px !important;
+  text-align: left !important;
+}
+
 .questions-table :deep(.arco-table-th) {
   background: #fafbfc;
   font-weight: 600;
@@ -265,8 +276,10 @@ onMounted(() => {
   font-size: 13px;
 }
 
-.questions-table :deep(.arco-table-td) {
-  padding: 12px 16px;
+.questions-table :deep(.arco-table-th .arco-table-cell),
+.questions-table :deep(.arco-table-td .arco-table-cell) {
+  justify-content: flex-start !important;
+  padding: 0 !important;
 }
 
 .questions-table :deep(.arco-table-tr:hover .arco-table-td) {

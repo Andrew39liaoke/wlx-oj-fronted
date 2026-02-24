@@ -47,6 +47,18 @@
     </div>
 
     <div
+      v-if="isTeacher"
+      class="menu-item"
+      :class="{ active: selected === 'class_manage' }"
+      @click="$emit('update:selected', 'class_manage')"
+      role="button"
+      tabindex="0"
+    >
+      <icon-user-group class="menu-icon" />
+      <span class="menu-label">班级管理</span>
+    </div>
+
+    <div
       v-if="isAdmin"
       class="menu-item"
       :class="{ active: selected === 'users' }"
@@ -132,6 +144,13 @@ const isAdmin = computed(
   () =>
     !!store.state.user?.loginUser &&
     store.state.user.loginUser.userRole === ACCESS_ENUM.ADMIN
+);
+
+// 是否为老师
+const isTeacher = computed(
+  () =>
+    !!store.state.user?.loginUser &&
+    store.state.user.loginUser.userRole === ACCESS_ENUM.TEACHER
 );
 
 // 是否为学生

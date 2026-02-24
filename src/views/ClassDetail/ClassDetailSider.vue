@@ -43,6 +43,18 @@
         <icon-bar-chart class="menu-icon" />
         <span class="menu-label">数据统计</span>
       </div>
+
+      <div
+        v-if="isTeacher"
+        class="menu-item"
+        :class="{ active: selected === 'add_question' }"
+        @click="$emit('update:selected', 'add_question')"
+        role="button"
+        tabindex="0"
+      >
+        <icon-plus class="menu-icon" />
+        <span class="menu-label">添加题目</span>
+      </div>
     </div>
 
     <!-- Bottom Info -->
@@ -63,7 +75,8 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, computed } from 'vue';
+import { useStore } from 'vuex';
 import {
   IconUser,
   IconUserGroup,
@@ -71,6 +84,7 @@ import {
   IconBarChart,
   IconIdcard,
   IconCopy,
+  IconPlus,
 } from '@arco-design/web-vue/es/icon';
 import message from '@arco-design/web-vue/es/message';
 import { ClassVO } from '../../../generated';
@@ -79,6 +93,12 @@ const props = defineProps<{
   selected: string;
   classInfo: ClassVO;
 }>();
+
+const store = useStore();
+const isTeacher = computed(() => {
+  const role = store.state.user?.loginUser?.userRole;
+  return role === 'teacher' || role === 'admin';
+});
 
 defineEmits(['update:selected']);
 

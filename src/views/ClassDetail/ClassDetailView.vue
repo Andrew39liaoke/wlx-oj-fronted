@@ -40,6 +40,11 @@
           v-else-if="selectedMenu === 'stats'"
           :class-id="classId"
         />
+        <ClassAddQuestionPanel
+          v-else-if="selectedMenu === 'add_question'"
+          :class-id="classId"
+          @success="selectedMenu = 'questions'"
+        />
       </div>
     </div>
   </div>
@@ -56,6 +61,7 @@ import ClassDetailSider from './ClassDetailSider.vue';
 import ClassMembersPanel from './ClassMembersPanel.vue';
 import ClassQuestionsPanel from './ClassQuestionsPanel.vue';
 import ClassStatsPanel from './ClassStatsPanel.vue';
+import ClassAddQuestionPanel from './ClassAddQuestionPanel.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -84,7 +90,12 @@ const loadClassInfo = async () => {
 };
 
 const goBack = () => {
-  router.push({ path: '/user/center', query: { selected: 'class' } });
+  const role = store.state.user?.loginUser?.userRole;
+  if (role === 'teacher' || role === 'admin') {
+    router.push({ path: '/user/center', query: { selected: 'class_manage' } });
+  } else {
+    router.push({ path: '/user/center', query: { selected: 'class' } });
+  }
 };
 
 onMounted(() => {
@@ -163,5 +174,16 @@ onMounted(() => {
   flex: 1 1 auto;
   min-width: 0;
   overflow: auto;
+}
+
+.pending-feature {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #f2f3f5;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
 }
 </style>

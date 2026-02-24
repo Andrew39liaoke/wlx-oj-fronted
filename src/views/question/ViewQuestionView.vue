@@ -91,8 +91,39 @@
               <span>题解</span>
             </div>
           </template>
-          <div class="empty-placeholder">
-            <a-empty description="题解内容正在准备中..." />
+          <div v-if="question?.answer" class="solution-content">
+            <div class="submit-list-wrap">
+              <a-collapse
+                :default-active-key="['1']"
+                expand-icon-position="right"
+                :bordered="false"
+                class="submit-collapse"
+              >
+                <a-collapse-item key="1">
+                  <template #header>
+                    <div class="submit-header">
+                      <span class="status-badge status-accepted">官方题解</span>
+                      <span class="lang-badge">Code</span>
+                    </div>
+                  </template>
+                  <div class="submit-code">
+                    <div class="markdown-body">
+                      <Viewer
+                        :value="
+                          question.answer?.includes('```')
+                            ? question.answer
+                            : '```\n' + question.answer + '\n```'
+                        "
+                        :plugins="viewerPlugins"
+                      />
+                    </div>
+                  </div>
+                </a-collapse-item>
+              </a-collapse>
+            </div>
+          </div>
+          <div v-else class="empty-placeholder">
+            <a-empty description="暂无题解内容" />
           </div>
         </a-tab-pane>
         <a-tab-pane key="submission">
@@ -102,8 +133,99 @@
               <span>提交记录</span>
             </div>
           </template>
-          <div class="empty-placeholder">
-            <a-empty description="暂时无法查看提交记录" />
+          <div
+            v-if="submitList && submitList.length > 0"
+            class="submit-list-wrap"
+          >
+            <a-collapse
+              expand-icon-position="right"
+              :bordered="false"
+              class="submit-collapse"
+            >
+              <a-collapse-item
+                v-for="item in submitList"
+                :key="String(item.id)"
+              >
+                <template #header>
+                  <div class="submit-header">
+                    <span
+                      class="status-badge"
+                      :class="getStatusClass(item.status || 0)"
+                      >{{ getStatusText(item.status || 0) }}</span
+                    >
+                    <span class="lang-badge">{{ item.language }}</span>
+                    <span class="submit-time" v-if="item.createTime">{{
+                      moment(item.createTime).format('YYYY-MM-DD HH:mm:ss')
+                    }}</span>
+                    <template v-if="item.judgeInfo">
+                      <a-tooltip
+                        content="消耗时间"
+                        v-if="
+                          item.judgeInfo.time !== undefined &&
+                          item.judgeInfo.time !== null
+                        "
+                      >
+                        <span class="info-tag time-tag"
+                          >{{ item.judgeInfo.time }} ms</span
+                        >
+                      </a-tooltip>
+                      <a-tooltip
+                        content="消耗内存"
+                        v-if="
+                          item.judgeInfo.memory !== undefined &&
+                          item.judgeInfo.memory !== null
+                        "
+                      >
+                        <span class="info-tag memory-tag"
+                          >{{ item.judgeInfo.memory }} KB</span
+                        >
+                      </a-tooltip>
+                      <a-tooltip
+                        content="通过用例数"
+                        v-if="
+                          item.passCaseCount !== undefined &&
+                          item.totalCaseCount !== undefined
+                        "
+                      >
+                        <span class="info-tag count-tag"
+                          >{{ item.passCaseCount }} /
+                          {{ item.totalCaseCount }}</span
+                        >
+                      </a-tooltip>
+                      <a-tooltip
+                        content="通过率"
+                        v-if="
+                          item.passRate !== undefined && item.passRate !== null
+                        "
+                      >
+                        <span
+                          class="info-tag rate-tag"
+                          :class="getRateClass(item.passRate)"
+                          >{{ (item.passRate * 100).toFixed(1) }}%</span
+                        >
+                      </a-tooltip>
+                    </template>
+                  </div>
+                </template>
+                <div class="submit-code">
+                  <div class="markdown-body">
+                    <Viewer
+                      :value="
+                        '```' +
+                        (item.language || '') +
+                        '\n' +
+                        (item.code || '') +
+                        '\n```'
+                      "
+                      :plugins="viewerPlugins"
+                    />
+                  </div>
+                </div>
+              </a-collapse-item>
+            </a-collapse>
+          </div>
+          <div v-else class="empty-placeholder">
+            <a-empty description="暂无提交记录" />
           </div>
         </a-tab-pane>
         <a-tab-pane key="ai-assistant">
@@ -113,8 +235,71 @@
               <span>AI助手</span>
             </div>
           </template>
-          <div class="empty-placeholder">
-            <a-empty description="AI助手功能开发中，敬请期待..." />
+          <div class="ai-chat-container">
+            <!-- 消息列表 -->
+            <div class="ai-messages" ref="aiMessagesRef">
+              <div v-if="aiMessages.length === 0" class="ai-welcome">
+                <div class="ai-welcome-icon">
+                  <icon-robot />
+                </div>
+                <h3>AI 编程助手</h3>
+                <p>我可以帮你分析题目、提供解题思路和代码建议</p>
+              </div>
+              <div
+                v-for="(msg, idx) in aiMessages"
+                :key="idx"
+                class="ai-message-row"
+                :class="{ 'is-user': msg.role === 'user' }"
+              >
+                <div class="ai-avatar">
+                  <icon-robot v-if="msg.role === 'ai'" />
+                  <icon-user v-else />
+                </div>
+                <div
+                  class="ai-message-bubble"
+                  :class="msg.role === 'user' ? 'bubble-user' : 'bubble-ai'"
+                >
+                  <div
+                    v-if="msg.role === 'ai'"
+                    class="markdown-body ai-markdown"
+                  >
+                    <Viewer
+                      :value="msg.content || ''"
+                      :plugins="viewerPlugins"
+                    />
+                  </div>
+                  <div v-else class="ai-text-content">{{ msg.content }}</div>
+                  <div
+                    v-if="msg.role === 'ai' && msg.loading"
+                    class="ai-typing-indicator"
+                  >
+                    <span></span><span></span><span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- 输入区 -->
+            <div class="ai-input-bar">
+              <a-textarea
+                v-model="aiInput"
+                placeholder="输入你的问题，例如：这道题的解题思路是什么？"
+                :auto-size="{ minRows: 1, maxRows: 4 }"
+                class="ai-input"
+                @keydown.enter.exact.prevent="sendAiMessage"
+                :disabled="aiLoading"
+              />
+              <a-button
+                type="primary"
+                class="ai-send-btn"
+                :loading="aiLoading"
+                :disabled="!aiInput.trim() || aiLoading"
+                @click="sendAiMessage"
+              >
+                <template #icon>
+                  <icon-send />
+                </template>
+              </a-button>
+            </div>
           </div>
         </a-tab-pane>
       </a-tabs>
@@ -135,7 +320,7 @@
           >
             <a-option value="java">
               <span class="lang-option">
-                <icon-code class="lang-icon lang-java" />
+                <icon-star class="lang-icon lang-java" />
                 Java
               </span>
             </a-option>
@@ -151,10 +336,10 @@
                 Go
               </span>
             </a-option>
-            <a-option value="html">
+            <a-option value="python">
               <span class="lang-option">
-                <icon-link class="lang-icon lang-html" />
-                HTML
+                <icon-fire class="lang-icon lang-python" />
+                Python
               </span>
             </a-option>
           </a-select>
@@ -206,12 +391,17 @@
 <script setup lang="ts">
 import {
   onMounted,
+  onUnmounted,
   ref,
+  reactive,
+  nextTick,
   withDefaults,
   defineProps,
   defineAsyncComponent,
   watch,
+  computed,
 } from 'vue';
+import { useStore } from 'vuex';
 import message from '@arco-design/web-vue/es/message';
 const CodeEditor = defineAsyncComponent(
   () => import('@/components/CodeEditor.vue')
@@ -225,8 +415,11 @@ const Viewer = defineAsyncComponent(() =>
 import {
   QuestionControllerService,
   QuestionSubmitAddRequest,
+  QuestionSubmitQueryRequest,
+  QuestionSubmitVO,
   QuestionVO,
 } from '../../../generated';
+import moment from 'moment';
 
 import {
   IconFile,
@@ -242,6 +435,9 @@ import {
   IconLink,
   IconSun,
   IconMoon,
+  IconStar,
+  IconFire,
+  IconUser,
 } from '@arco-design/web-vue/es/icon';
 
 interface Props {
@@ -259,9 +455,105 @@ const loadData = async () => {
   const res = await QuestionControllerService.getQuestionVoById(props.id);
   if (res.code === 0) {
     question.value = res.data;
+    console.log('题目数据:', res.data);
+    console.log('Answer字段:', res.data?.answer);
   } else {
     message.error('加载失败，' + res.message);
   }
+};
+
+const store = useStore();
+const loginUser = computed(() => store.state.user?.loginUser);
+const submitList = ref<QuestionSubmitVO[]>([]);
+
+const loadSubmits = async () => {
+  if (!question.value?.id || !loginUser.value?.id) return;
+  const res = await QuestionControllerService.listQuestionSubmitByPage({
+    questionId: question.value.id,
+    userId: loginUser.value?.id,
+    current: 1,
+    pageSize: 20,
+    sortField: 'createTime',
+    sortOrder: 'descend',
+  } as QuestionSubmitQueryRequest);
+  if (res.code === 0 && res.data) {
+    submitList.value = res.data.records || [];
+  }
+};
+
+let pollTimer: ReturnType<typeof setInterval> | null = null;
+const startPolling = () => {
+  if (!pollTimer) {
+    // 轮询后端数据库，实时更新判题状态
+    pollTimer = setInterval(() => {
+      const isJudging = submitList.value.some(
+        (item) => item.status === 0 || item.status === 1
+      );
+      if (isJudging) {
+        loadSubmits();
+      }
+    }, 2000); // 2秒轮询一次
+  }
+};
+
+const stopPolling = () => {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+};
+
+watch(
+  () => [question.value?.id, loginUser.value?.id],
+  ([qId, uId]) => {
+    if (qId && uId) {
+      loadSubmits();
+    }
+  },
+  { immediate: true }
+);
+
+const getStatusText = (status: number) => {
+  const statusMap: Record<number, string> = {
+    0: '待判题',
+    1: '判题中',
+    2: '执行通过',
+    3: '错误解答',
+    4: '编译出错',
+    5: '部分内存溢出',
+    6: '超时',
+    7: '展示错误',
+    8: '部分输出溢出',
+    9: '危险操作',
+    10: '报错',
+    11: '系统错误',
+  };
+  return statusMap[status] || '未知';
+};
+
+const getStatusClass = (status: number) => {
+  const classMap: Record<number, string> = {
+    0: 'status-waiting',
+    1: 'status-judging',
+    2: 'status-accepted',
+    3: 'status-failed',
+    4: 'status-error',
+    5: 'status-failed',
+    6: 'status-failed',
+    7: 'status-error',
+    8: 'status-failed',
+    9: 'status-error',
+    10: 'status-error',
+    11: 'status-error',
+  };
+  return classMap[status] || 'status-unknown';
+};
+
+const getRateClass = (rate: number | undefined) => {
+  if (rate === undefined || rate === null) return 'rate-none';
+  if (rate >= 1) return 'rate-perfect';
+  if (rate >= 0.6) return 'rate-good';
+  return 'rate-bad';
 };
 
 const form = ref<QuestionSubmitAddRequest>({
@@ -311,6 +603,18 @@ func main() {
 </body>
 </html>
 `,
+  python: `# 1: 无需 package
+# 2: 无需类名，直接写代码
+
+import sys
+
+def main():
+    # 在此输入您的代码...
+    pass
+
+if __name__ == "__main__":
+    main()
+`,
 };
 
 watch(
@@ -339,6 +643,7 @@ const doSubmit = async () => {
   });
   if (res.code === 0) {
     message.success('提交成功');
+    loadSubmits();
   } else {
     message.error('提交失败,' + res.message);
   }
@@ -346,6 +651,11 @@ const doSubmit = async () => {
 
 onMounted(() => {
   loadData();
+  startPolling();
+});
+
+onUnmounted(() => {
+  stopPolling();
 });
 
 const changeCode = (value: string) => {
@@ -353,6 +663,127 @@ const changeCode = (value: string) => {
 };
 
 const leftPanelRef = ref<HTMLElement | null>(null);
+
+// ========== AI 助手相关 ==========
+
+interface AiMessage {
+  role: 'user' | 'ai';
+  content: string;
+  loading?: boolean;
+}
+
+const aiMessages = ref<AiMessage[]>([]);
+const aiInput = ref('');
+const aiLoading = ref(false);
+const aiMessagesRef = ref<HTMLElement | null>(null);
+const aiChatId = ref(generateUUID());
+
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+function scrollToBottom() {
+  nextTick(() => {
+    if (aiMessagesRef.value) {
+      aiMessagesRef.value.scrollTop = aiMessagesRef.value.scrollHeight;
+    }
+  });
+}
+
+async function sendAiMessage() {
+  const prompt = aiInput.value.trim();
+  if (!prompt || aiLoading.value) return;
+
+  const userId = loginUser.value?.id;
+  if (!userId) {
+    message.error('请先登录');
+    return;
+  }
+
+  // 添加用户消息
+  aiMessages.value.push({ role: 'user', content: prompt });
+  aiInput.value = '';
+  scrollToBottom();
+
+  // 添加 AI 占位消息
+  aiMessages.value.push({ role: 'ai', content: '', loading: true });
+  const aiMsgIndex = aiMessages.value.length - 1;
+  aiLoading.value = true;
+  scrollToBottom();
+
+  try {
+    const token = localStorage.getItem('token') || '';
+    const response = await fetch('http://localhost:8088/ai/questionAnswer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token,
+      },
+      body: JSON.stringify({
+        userId: userId,
+        chatId: aiChatId.value,
+        prompt: prompt,
+        type: 'CODE',
+        problemId: props.id,
+      }),
+    });
+
+    if (!response.ok || !response.body) {
+      throw new Error('请求失败');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+    let streamDone = false;
+
+    while (!streamDone) {
+      const { done, value } = await reader.read();
+      if (done) {
+        streamDone = true;
+        continue;
+      }
+
+      buffer += decoder.decode(value, { stream: true });
+
+      // 解析 SSE 数据行
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('data:')) {
+          const data = trimmed.slice(5).trim();
+          if (data && data !== '[DONE]') {
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.data !== undefined && parsed.data !== null) {
+                aiMessages.value[aiMsgIndex].content += parsed.data;
+              }
+            } catch {
+              // 非 JSON，忽略
+            }
+            scrollToBottom();
+          }
+        }
+      }
+    }
+  } catch (err: any) {
+    if (!aiMessages.value[aiMsgIndex].content) {
+      aiMessages.value[aiMsgIndex].content =
+        '抱歉，AI 服务暂时不可用，请稍后再试。';
+    }
+    console.error('AI 请求失败:', err);
+  } finally {
+    aiMessages.value[aiMsgIndex].loading = false;
+    aiLoading.value = false;
+    scrollToBottom();
+  }
+}
 </script>
 
 <style>
@@ -599,6 +1030,354 @@ const leftPanelRef = ref<HTMLElement | null>(null);
   text-align: center;
 }
 
+/* ===== 题解内容 ===== */
+.solution-content {
+  padding: 8px 0;
+}
+
+/* 题解 IDE 风格展示 */
+.solution-content .markdown-body {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #24292e;
+}
+
+.solution-content .markdown-body p {
+  margin: 0 0 12px 0;
+}
+
+.solution-content .markdown-body p:last-child {
+  margin-bottom: 0;
+}
+
+.count-tag {
+  background: rgba(139, 92, 246, 0.1);
+  color: #7c3aed;
+}
+
+.rate-none {
+  background: rgba(15, 20, 30, 0.05);
+  color: #86909c;
+}
+
+.rate-perfect {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.rate-good {
+  background: rgba(251, 191, 36, 0.1);
+  color: #d97706;
+}
+
+.rate-bad {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+/* IDE 风格代码块 */
+.solution-content .markdown-body pre {
+  background: #1e1e1e !important;
+  color: #d4d4d4 !important;
+  padding: 0 !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  font-size: 13px;
+  margin: 12px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 代码块标题栏 */
+.solution-content .markdown-body pre::before {
+  content: 'Code';
+  display: block;
+  background: #2d2d2d;
+  color: #858585;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  border-bottom: 1px solid #3c3c3c;
+  border-radius: 8px 8px 0 0;
+}
+
+.solution-content .markdown-body pre code {
+  display: block;
+  padding: 12px 16px;
+  overflow-x: auto;
+  background: transparent !important;
+  color: inherit !important;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+  line-height: 1.6;
+}
+
+/* 内联代码 */
+.solution-content .markdown-body code:not(pre code) {
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #e74c3c !important;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 13px;
+}
+
+/* 列表样式 */
+.solution-content .markdown-body ul,
+.solution-content .markdown-body ol {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+.solution-content .markdown-body li {
+  margin: 4px 0;
+}
+
+.solution-content .markdown-body h1,
+.solution-content .markdown-body h2,
+.solution-content .markdown-body h3 {
+  margin: 16px 0 8px 0;
+  color: #24292e;
+}
+
+.solution-content .markdown-body h1:first-child,
+.solution-content .markdown-body h2:first-child,
+.solution-content .markdown-body h3:first-child {
+  margin-top: 0;
+}
+
+/* ===== AI 助手聊天界面 ===== */
+.ai-chat-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 180px);
+  min-height: 400px;
+}
+
+.ai-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 130, 246, 0.25) transparent;
+}
+.ai-messages::-webkit-scrollbar {
+  width: 5px;
+}
+.ai-messages::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.25);
+  border-radius: 3px;
+}
+
+/* 欢迎占位 */
+.ai-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #94a3b8;
+  gap: 8px;
+}
+.ai-welcome-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.15),
+    rgba(99, 102, 241, 0.15)
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #6366f1;
+  margin-bottom: 4px;
+}
+.ai-welcome h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #334155;
+}
+.ai-welcome p {
+  margin: 0;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+/* 消息行 */
+.ai-message-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+.ai-message-row.is-user {
+  flex-direction: row-reverse;
+}
+
+/* 头像 */
+.ai-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.ai-message-row:not(.is-user) .ai-avatar {
+  color: #6366f1;
+}
+.ai-message-row.is-user .ai-avatar {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+/* 消息气泡 */
+.ai-message-bubble {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+.bubble-ai {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  color: #1e293b;
+  border-top-left-radius: 4px;
+}
+.bubble-user {
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+  color: #fff;
+  border-top-right-radius: 4px;
+  box-shadow: 0 2px 12px rgba(59, 130, 246, 0.25);
+}
+
+.ai-text-content {
+  white-space: pre-wrap;
+}
+
+.ai-markdown {
+  font-size: 13.5px;
+}
+.ai-markdown p {
+  margin: 0 0 8px 0;
+}
+.ai-markdown p:last-child {
+  margin-bottom: 0;
+}
+.ai-markdown pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 12.5px;
+  margin: 8px 0;
+}
+.ai-markdown code {
+  background: rgba(59, 130, 246, 0.08);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  font-size: 12.5px;
+}
+.ai-markdown pre code {
+  background: none;
+  padding: 0;
+}
+
+/* 打字指示器 */
+.ai-typing-indicator {
+  display: inline-flex;
+  gap: 4px;
+  padding-top: 4px;
+}
+.ai-typing-indicator span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #94a3b8;
+  animation: aiTypingBounce 1.2s infinite ease-in-out;
+}
+.ai-typing-indicator span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.ai-typing-indicator span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes aiTypingBounce {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+/* 输入区 */
+.ai-input-bar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 0 0;
+  border-top: 1px solid rgba(59, 130, 246, 0.1);
+  align-items: flex-end;
+}
+.ai-input {
+  flex: 1;
+}
+.ai-input .arco-textarea {
+  border-radius: 10px !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(8px);
+  font-size: 13.5px;
+  padding: 8px 12px;
+  transition: all 0.2s ease;
+}
+.ai-input .arco-textarea:focus {
+  border-color: rgba(59, 130, 246, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+}
+.ai-send-btn {
+  height: 36px;
+  width: 36px;
+  min-width: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%) !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+  transition: all 0.2s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ai-send-btn:hover:not(:disabled) {
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+  transform: translateY(-1px);
+}
+.ai-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ===== 编辑器工具栏 ===== */
 .editor-toolbar {
   display: flex;
@@ -656,8 +1435,8 @@ const leftPanelRef = ref<HTMLElement | null>(null);
 .lang-go {
   color: #00add8;
 }
-.lang-html {
-  color: #e34f26;
+.lang-python {
+  color: #ffd43b;
 }
 
 /* ===== 主题切换 ===== */
@@ -762,6 +1541,97 @@ const leftPanelRef = ref<HTMLElement | null>(null);
 }
 .submit-btn:active {
   transform: translateY(0);
+}
+
+/* ===== 提交记录 ===== */
+.submit-list-wrap {
+  padding: 8px 0;
+}
+.submit-collapse {
+  background: transparent;
+}
+.submit-collapse .arco-collapse-item {
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+}
+.submit-collapse .arco-collapse-item-header {
+  border-bottom: none;
+  padding: 12px 14px;
+}
+.submit-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.submit-time {
+  font-size: 13px;
+  color: #64748b;
+}
+.submit-code {
+  padding: 0;
+}
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.status-waiting {
+  background: rgba(251, 191, 36, 0.12);
+  color: #d97706;
+}
+.status-judging {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+.status-accepted {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+.status-failed {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+}
+.status-error {
+  background: rgba(249, 115, 22, 0.12);
+  color: #ea580c;
+}
+.status-unknown {
+  background: rgba(15, 20, 30, 0.06);
+  color: #86909c;
+}
+
+.lang-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(139, 92, 246, 0.1);
+  color: #7c3aed;
+}
+.info-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.memory-tag {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+.time-tag {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
 }
 
 /* ===== Arco 组件覆写 ===== */

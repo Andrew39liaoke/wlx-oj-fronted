@@ -7,5 +7,6 @@ import store from './store';
 import '@/plugins/axios';
 import '@/access';
 import 'bytemd/dist/index.css';
+import 'highlight.js/styles/atom-one-dark.css';
 
 createApp(App).use(ArcoVue).use(store).use(router).mount('#app');

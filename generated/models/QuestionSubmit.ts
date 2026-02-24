@@ -11,6 +11,10 @@ export type QuestionSubmit = {
   status?: number;
   questionId?: number;
   userId?: number;
+  passCaseCount?: number;
+  totalCaseCount?: number;
+  passRate?: number;
+  score?: number;
   createTime?: string;
   updateTime?: string;
   isDelete?: number;

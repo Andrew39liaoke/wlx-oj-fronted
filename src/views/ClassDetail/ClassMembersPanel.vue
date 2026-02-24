@@ -51,6 +51,25 @@
               }}</span>
             </template>
           </a-table-column>
+          <a-table-column
+            title="操作"
+            v-if="isTeacher"
+            align="center"
+            :width="120"
+          >
+            <template #cell="{ record }">
+              <a-button
+                type="text"
+                status="danger"
+                size="small"
+                class="action-btn"
+                @click="onRemoveMember(record)"
+              >
+                <template #icon><icon-delete /></template>
+                移除
+              </a-button>
+            </template>
+          </a-table-column>
         </template>
       </a-table>
     </div>
@@ -72,14 +91,54 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, reactive, onMounted, watch } from 'vue';
-import { IconSearch } from '@arco-design/web-vue/es/icon';
+import { defineProps, ref, reactive, onMounted, watch, computed } from 'vue';
+import { useStore } from 'vuex';
+import { IconSearch, IconDelete } from '@arco-design/web-vue/es/icon';
 import message from '@arco-design/web-vue/es/message';
+import Modal from '@arco-design/web-vue/es/modal';
 import { ClassControllerService } from '../../../generated';
 
 const props = defineProps<{
   classId: number;
 }>();
+
+const store = useStore();
+const isTeacher = computed(() => {
+  const role = store.state.user?.loginUser?.userRole;
+  return role === 'teacher' || role === 'admin';
+});
+
+const onRemoveMember = (record: any) => {
+  Modal.confirm({
+    title: '确认移除',
+    content: `确定要将学生 ${
+      record.nickName || record.userName || '未知用户'
+    } 移出班级吗？`,
+    onOk: async () => {
+      try {
+        const res = await ClassControllerService.removeClassStudent({
+          classId: props.classId,
+          studentId: record.id,
+          userId: store.state.user?.loginUser?.id,
+          userRole: store.state.user?.loginUser?.userRole || '',
+        });
+        if (res.code === 0 && res.data) {
+          message.success('移除成功');
+          // 如果当前页只有一条数据且不是第一页，则往前跳一页
+          if (dataList.value.length === 1 && searchParams.current > 1) {
+            searchParams.current -= 1;
+          }
+          loadData();
+        } else {
+          message.error(`移除失败: ${res.message}`);
+        }
+      } catch (e) {
+        console.error(e);
+        message.error('移除操作异常');
+      }
+    },
+  });
+};
 
 const loading = ref(false);
 const dataList = ref<any[]>([]);

@@ -11,6 +11,7 @@ export type QuestionVO = {
   id?: number;
   title?: string;
   content?: string;
+  answer?: string;
   tags?: Array<string>;
   submitNum?: number;
   acceptedNum?: number;

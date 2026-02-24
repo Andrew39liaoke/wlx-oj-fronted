@@ -8,6 +8,7 @@
       <PostManagePanel v-else-if="selected === 'posts'" />
       <QuestionManagePanel v-else-if="selected === 'questions'" />
       <MyClassPanel v-else-if="selected === 'class'" />
+      <ClassManagePanel v-else-if="selected === 'class_manage'" />
       <UserManagePanel v-else-if="selected === 'users'" />
     </div>
   </div>
@@ -22,10 +23,11 @@ import PostManagePanel from './PostManagePanel.vue';
 import QuestionManagePanel from './QuestionManagePanel.vue';
 import UserManagePanel from './UserManagePanel.vue';
 import MyClassPanel from './MyClassPanel.vue';
+import ClassManagePanel from './ClassManagePanel.vue';
 
-const selected = ref<'profile' | 'posts' | 'questions' | 'users' | 'class'>(
-  'profile'
-);
+const selected = ref<
+  'profile' | 'posts' | 'questions' | 'users' | 'class' | 'class_manage'
+>('profile');
 const route = useRoute();
 
 onMounted(() => {
@@ -35,7 +37,8 @@ onMounted(() => {
     s === 'posts' ||
     s === 'questions' ||
     s === 'users' ||
-    s === 'class'
+    s === 'class' ||
+    s === 'class_manage'
   ) {
     selected.value = s as any;
   }
@@ -50,7 +53,8 @@ watch(
       s === 'posts' ||
       s === 'questions' ||
       s === 'users' ||
-      s === 'class'
+      s === 'class' ||
+      s === 'class_manage'
     ) {
       selected.value = s as any;
     }
