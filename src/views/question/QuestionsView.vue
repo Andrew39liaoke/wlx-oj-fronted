@@ -4,22 +4,37 @@
     <div class="left">
       <a-card class="content-card" bordered>
         <div class="card-inner">
-          <!-- Category pills -->
-          <div class="category-pills" role="tablist" aria-label="题目分类">
+          <!-- Category pills with Expand/Collapse -->
+          <div class="category-header">
             <div
-              v-for="cat in categories"
-              :key="cat.key"
-              class="pill"
-              :class="{ active: selectedCategory === cat.key }"
-              @click="handleCategoryClick(cat)"
+              class="category-pills"
+              :class="{ expanded: isTagsExpanded }"
+              role="tablist"
+              aria-label="题目分类"
             >
-              <component
-                :is="cat.icon"
-                class="pill-icon"
-                :style="{ color: cat.iconColor }"
-              />
-              <span class="pill-label">{{ cat.label }}</span>
+              <div
+                v-for="cat in categories"
+                :key="cat.key"
+                class="pill"
+                :class="{ active: selectedCategory === cat.key }"
+                @click="handleCategoryClick(cat)"
+              >
+                <component
+                  :is="cat.icon"
+                  class="pill-icon"
+                  :style="{ color: cat.iconColor }"
+                />
+                <span class="pill-label">{{ cat.label }}</span>
+              </div>
             </div>
+            <button
+              v-if="categories.length > 8"
+              class="expand-btn"
+              @click="isTagsExpanded = !isTagsExpanded"
+            >
+              {{ isTagsExpanded ? '收起' : '更多' }}
+              <component :is="isTagsExpanded ? IconUp : IconDown" />
+            </button>
           </div>
 
           <!-- Modern search row: left has input + two small icons, right has a single icon -->
@@ -125,16 +140,63 @@
 
     <!-- RIGHT: stats column (takes 2 parts) -->
     <div class="right">
-      <a-card class="stat-card" bordered>
-        <div class="stat-inner">
-          <div class="stat-value">8</div>
-          <div class="stat-label">题库题目数</div>
+      <a-card class="stat-card calendar-card" bordered>
+        <div class="calendar-header">
+          <div class="title-and-controls">
+            <div class="calendar-title">打卡日历</div>
+            <div class="calendar-controls">
+              <button class="cal-nav-btn" @click="changeMonth(-1)">
+                <icon-left />
+              </button>
+              <span class="cal-month">{{ currentMonth }}月</span>
+              <button class="cal-nav-btn" @click="changeMonth(1)">
+                <icon-right />
+              </button>
+            </div>
+          </div>
+          <div class="calendar-badge" :class="{ 'is-full-month': isFullMonth }">
+            <div class="badge-bg"></div>
+            <div class="badge-text" style="font-size: 16px; font-weight: bold">
+              {{ currentMonth }}
+            </div>
+            <div class="badge-text" style="font-size: 10px">FEB</div>
+          </div>
+        </div>
+
+        <div class="calendar-grid-header">
+          <span>日</span><span>一</span><span>二</span><span>三</span
+          ><span>四</span><span>五</span><span>六</span>
+        </div>
+
+        <div class="calendar-grid">
+          <div
+            v-for="(day, index) in calendarDays"
+            :key="index"
+            class="cal-day"
+            :class="{
+              'is-empty': !day.date,
+              'is-today': day.isToday,
+              'has-record': day.hasRecord,
+            }"
+          >
+            <span class="day-num" v-if="day.date">{{ day.date }}</span>
+            <div class="day-dot" v-if="day.date"></div>
+          </div>
+        </div>
+
+        <div class="calendar-footer">
+          <span class="rule-link">打卡规则</span>
         </div>
       </a-card>
-      <a-card class="stat-card" bordered>
-        <div class="stat-inner">
-          <div class="stat-value">2</div>
-          <div class="stat-label">今日提交</div>
+      <a-card class="stat-card promo-card" bordered>
+        <img
+          src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=600&auto=format&fit=crop"
+          class="promo-image"
+          alt="Programming"
+        />
+        <div class="promo-overlay">
+          <div class="promo-text">Keep Coding</div>
+          <div class="promo-sub">每日精进，不负韶华</div>
         </div>
       </a-card>
     </div>
@@ -170,6 +232,20 @@ import {
   IconFilter,
   IconHeart,
   IconStar,
+  IconDown,
+  IconUp,
+  IconTags,
+  IconBug,
+  IconBulb,
+  IconCompass,
+  IconFire,
+  IconThunderbolt,
+  IconFontColors,
+  IconApps,
+  IconMindMapping,
+  IconNav,
+  IconLeft,
+  IconRight,
 } from '@arco-design/web-vue/es/icon';
 
 // Vuex store
@@ -205,22 +281,212 @@ const isLoggedIn = computed(
 );
 const currentUserId = computed(() => loginUser.value?.id);
 
+// --- Calendar State ---
+const currentDate = new Date();
+const currentYear = ref(currentDate.getFullYear());
+const currentMonth = ref(currentDate.getMonth() + 1); // 1-12
+const punchInRecords = ref<number[]>([]);
+
+interface CalendarDay {
+  date: number | null;
+  hasRecord: boolean;
+  isToday: boolean;
+}
+
+const calendarDays = computed<CalendarDay[]>(() => {
+  const days: CalendarDay[] = [];
+  const startObj = new Date(currentYear.value, currentMonth.value - 1, 1);
+  const startDayOfWeek = startObj.getDay(); // 0(Sun) - 6(Sat)
+  const daysInMonth = new Date(
+    currentYear.value,
+    currentMonth.value,
+    0
+  ).getDate();
+
+  // Fill empty spaces before first day
+  for (let i = 0; i < startDayOfWeek; i++) {
+    days.push({ date: null, hasRecord: false, isToday: false });
+  }
+
+  // Real check for internal today
+  const actualObj = new Date();
+
+  // Fill real days
+  for (let i = 1; i <= daysInMonth; i++) {
+    const isTodayDate =
+      actualObj.getDate() === i &&
+      actualObj.getMonth() + 1 === currentMonth.value &&
+      actualObj.getFullYear() === currentYear.value;
+    days.push({
+      date: i,
+      hasRecord: punchInRecords.value.includes(i),
+      isToday: isTodayDate,
+    });
+  }
+
+  return days;
+});
+
+const isFullMonth = computed(() => {
+  if (!punchInRecords.value || punchInRecords.value.length === 0) return false;
+
+  const daysInMonth = new Date(
+    currentYear.value,
+    currentMonth.value,
+    0
+  ).getDate();
+
+  // If we're looking at the current actual month, it might not be over yet,
+  // but we can color it if they hit every day *so far* up to today, or strictly if they did the whole month.
+  // We'll require them to have punched in for every exact day of the month for "Full Month Badge".
+  // However, practically it could be "punched in all days up to today" if it's the current month.
+  // Standard logic: user has records for ALL days of that month.
+  return punchInRecords.value.length === daysInMonth;
+});
+
+const loadSubmitCalendar = async () => {
+  if (!isLoggedIn.value) return;
+  try {
+    const res = await QuestionControllerService.getSubmitCalendar(
+      currentYear.value,
+      currentMonth.value
+    );
+    if (res.code === 0 && res.data) {
+      punchInRecords.value = res.data;
+    } else {
+      punchInRecords.value = [];
+    }
+  } catch (error) {
+    console.error('Failed to load submit calendar:', error);
+    punchInRecords.value = [];
+  }
+};
+
+const changeMonth = (offset: number) => {
+  let m = currentMonth.value + offset;
+  let y = currentYear.value;
+  if (m > 12) {
+    m = 1;
+    y++;
+  } else if (m < 1) {
+    m = 12;
+    y--;
+  }
+  currentMonth.value = m;
+  currentYear.value = y;
+};
+
+watchEffect(() => {
+  if (isLoggedIn.value && currentMonth.value && currentYear.value) {
+    loadSubmitCalendar();
+  }
+});
+// ----------------------
+
 // category pills (use imported icon components)
-const categories = [
-  { key: 'all', label: '全部题目', icon: IconMenu, iconColor: '#f97316' },
-  { key: 'algo', label: '算法', icon: IconExperiment, iconColor: '#f59e0b' },
-  { key: 'db', label: '数据库', icon: IconStorage, iconColor: '#06b6d4' },
-  { key: 'shell', label: 'Shell', icon: IconCommand, iconColor: '#10b981' },
-  { key: 'thread', label: '多线程', icon: IconBranch, iconColor: '#8b5cf6' },
-  { key: 'js', label: 'JavaScript', icon: IconCode, iconColor: '#3b82f6' },
-  { key: 'pandas', label: 'pandas', icon: IconBarChart, iconColor: '#ef4444' },
+const presetIconMap: Record<string, { icon: any; color: string }> = {
+  算法: { icon: IconExperiment, color: '#f59e0b' },
+  数据库: { icon: IconStorage, color: '#06b6d4' },
+  Shell: { icon: IconCommand, color: '#10b981' },
+  多线程: { icon: IconBranch, color: '#8b5cf6' },
+  JavaScript: { icon: IconCode, color: '#3b82f6' },
+  pandas: { icon: IconBarChart, color: '#ef4444' },
+};
+
+const iconPalette = [
+  IconCode,
+  IconTags,
+  IconBug,
+  IconBulb,
+  IconCompass,
+  IconFire,
+  IconThunderbolt,
+  IconFontColors,
+  IconApps,
+  IconMindMapping,
+  IconNav,
 ];
+const colorPalette = [
+  '#f59e0b',
+  '#06b6d4',
+  '#10b981',
+  '#8b5cf6',
+  '#3b82f6',
+  '#ef4444',
+  '#f97316',
+  '#14b8a6',
+  '#6366f1',
+  '#d946ef',
+  '#f43f5e',
+  '#84cc16',
+];
+
+const getIconAndColorForTag = (tag: string) => {
+  let hash = 0;
+  for (let i = 0; i < tag.length; i++) {
+    hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  hash = Math.abs(hash);
+  const icon = iconPalette[hash % iconPalette.length];
+  const color = colorPalette[hash % colorPalette.length];
+  return { icon, color };
+};
+
+const isTagsExpanded = ref(false);
+
+const categories = ref<
+  { key: string; label: string; icon: any; iconColor: string }[]
+>([{ key: 'all', label: '全部题目', icon: IconMenu, iconColor: '#f97316' }]);
 const selectedCategory = ref('all');
+
+const loadTags = async () => {
+  try {
+    const res = await QuestionControllerService.getAllQuestionTags();
+    if (res.code === 0 && res.data) {
+      const dbTags = res.data;
+      const baseCategories = [
+        { key: 'all', label: '全部题目', icon: IconMenu, iconColor: '#f97316' },
+      ];
+      const dynamicCategories = dbTags.map((tag: string) => {
+        const preset = presetIconMap[tag];
+        if (preset) {
+          return {
+            key: tag,
+            label: tag,
+            icon: preset.icon,
+            iconColor: preset.color,
+          };
+        }
+        const generated = getIconAndColorForTag(tag);
+        return {
+          key: tag,
+          label: tag,
+          icon: generated.icon,
+          iconColor: generated.color,
+        };
+      });
+      categories.value = [...baseCategories, ...dynamicCategories];
+    }
+  } catch (error) {
+    console.error('Failed to load tags:', error);
+  }
+};
 
 const handleCategoryClick = (cat: { key: string }) => {
   selectedCategory.value = cat.key;
-  // TODO: implement filtering or remote fetch based on category
-  console.log('Category clicked (TODO):', cat.key);
+  if (cat.key === 'all') {
+    searchParams.value = {
+      ...searchParams.value,
+      tags: [],
+      current: 1,
+    };
+  } else {
+    searchParams.value = {
+      ...searchParams.value,
+      tags: [cat.key],
+      current: 1,
+    };
+  }
 };
 
 const handleSort = () => {
@@ -311,12 +577,13 @@ watchEffect(() => {
  * 页面加载时，请求数据
  */
 onMounted(async () => {
+  loadTags();
   loadData();
 });
 
 // {id: "1", title: "A+ D", content: "新的题目内容", tags: "["二叉树"]", answer: "新的答案", submitNum: 0,…}
 
-const columns = [
+const columns: any[] = [
   {
     title: '题号',
     dataIndex: 'id',
@@ -352,7 +619,7 @@ const onPageChange = (page: number) => {
   };
 };
 
-const onRowClick = (record: Question) => {
+const onRowClick = (record: any) => {
   console.log('1111' + isLoggedIn.value);
   // 如果 store 中已经显示为已登录，则直接进入题目详情
   if (isLoggedIn.value) {
@@ -533,15 +800,50 @@ const doSubmit = () => {
   min-height: 0;
 }
 
-/* Category pills */
+/* Category header & pills */
+.category-header {
+  display: flex;
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(15, 20, 30, 0.06);
+  margin-bottom: 6px;
+  padding-bottom: 10px;
+}
+
 .category-pills {
   display: flex;
   gap: 12px;
   align-items: center;
-  padding: 4px 4px 10px;
-  border-bottom: 1px solid rgba(15, 20, 30, 0.06);
-  margin-bottom: 6px;
   flex-wrap: wrap;
+  flex: 1;
+  overflow: hidden;
+  max-height: 34px; /* Default height to show one line */
+  transition: max-height 0.3s cubic-bezier(0.2, 0.9, 0.2, 1);
+  padding: 0 4px;
+}
+
+.category-pills.expanded {
+  max-height: 500px; /* Large enough to show all */
+}
+
+.expand-btn {
+  background: transparent;
+  border: none;
+  color: #86909c;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.expand-btn:hover {
+  background: #f2f3f5;
+  color: #165dff;
 }
 .pill {
   display: inline-flex;
@@ -640,8 +942,8 @@ const doSubmit = () => {
   height: 100%;
 }
 .stat-card {
-  /* explicitly set each card to half of column height minus gap */
-  height: calc((100% - 12px) / 2);
+  /* give it flex layout but let content dictate exact size, avoid overflow */
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -663,6 +965,252 @@ const doSubmit = () => {
 .stat-label {
   margin-top: 8px;
   color: #6b7280;
+}
+
+/* Promo Card Styles */
+.promo-card {
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+  border: none;
+}
+.promo-card :deep(.arco-card-body) {
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+.promo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+.promo-card:hover .promo-image {
+  transform: scale(1.05);
+}
+.promo-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.1) 60%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 20px;
+  color: #ffffff;
+  pointer-events: none;
+}
+.promo-text {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+.promo-sub {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+/* Calendar Styles */
+.calendar-card {
+  padding: 16px 20px;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  position: relative;
+  flex: none; /* Let calendar card size based on its content naturally */
+  height: auto;
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.title-and-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.calendar-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111;
+}
+
+.calendar-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f2f3f5;
+  border-radius: 14px;
+  padding: 2px 4px;
+}
+
+.cal-nav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #86909c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.cal-nav-btn:hover {
+  background: #e5e6eb;
+  color: #1d2129;
+}
+
+.cal-month {
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 24px;
+  text-align: center;
+}
+
+.calendar-badge {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  width: 48px;
+  height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* Simple badge geometry representation */
+  background: linear-gradient(135deg, #e3e3e3 0%, #ffffff 100%);
+  border: 1px solid #dcdcdc;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-badge .badge-text {
+  color: #86909c;
+  line-height: 1.2;
+  transition: color 0.3s ease;
+}
+
+/* Full Month Badge Styles & Normal Badge Hover */
+.calendar-badge.is-full-month,
+.calendar-badge:hover {
+  background: linear-gradient(135deg, #0cebeb 0%, #20e3b2 50%, #29ffc6 100%);
+  border: 1px solid #0cdbb3;
+  box-shadow: 0 4px 12px rgba(32, 227, 178, 0.4);
+}
+
+.calendar-badge.is-full-month {
+  animation: glow 2s infinite alternate;
+}
+
+.calendar-badge.is-full-month .badge-text,
+.calendar-badge:hover .badge-text {
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-badge.is-full-month:hover,
+.calendar-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(32, 227, 178, 0.6);
+  cursor: pointer;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 5px rgba(32, 227, 178, 0.2);
+  }
+  to {
+    box-shadow: 0 0 20px rgba(32, 227, 178, 0.8),
+      0 0 30px rgba(41, 255, 198, 0.6);
+  }
+}
+.calendar-grid-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  color: #86909c;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 8px; /* Reduced to avoid large vertical overflow */
+  text-align: center;
+}
+
+.cal-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  min-height: 32px; /* Reduced min-height */
+  color: #1d2129;
+  position: relative;
+}
+
+.day-num {
+  z-index: 2;
+  font-weight: 500;
+}
+
+.day-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #e5e6eb;
+  margin-top: 4px;
+  transition: all 0.3s;
+}
+
+.cal-day.has-record .day-dot {
+  background-color: #165dff;
+}
+
+.cal-day.is-today .day-num {
+  background-color: #165dff;
+  color: white;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -3px; /* visual adjust */
+}
+
+/* For today, force dot to stay somewhat distinct or hide. Here we keep dot. */
+.cal-day.is-today .day-dot {
+  margin-top: 2px;
+}
+
+.calendar-footer {
+  margin-top: auto;
+  text-align: right;
+  padding-top: 16px;
+}
+.rule-link {
+  color: #86909c;
+  font-size: 12px;
+  cursor: pointer;
+}
+.rule-link:hover {
+  text-decoration: underline;
 }
 
 /* Table row height customization */

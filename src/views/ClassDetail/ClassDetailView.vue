@@ -40,6 +40,14 @@
           v-else-if="selectedMenu === 'stats'"
           :class-id="classId"
         />
+        <ClassKnowledgePanel
+          v-else-if="selectedMenu === 'knowledge'"
+          :class-id="classId"
+        />
+        <ClassChatPanel
+          v-else-if="selectedMenu === 'chat'"
+          :class-id="classId"
+        />
         <ClassAddQuestionPanel
           v-else-if="selectedMenu === 'add_question'"
           :class-id="classId"
@@ -62,6 +70,8 @@ import ClassMembersPanel from './ClassMembersPanel.vue';
 import ClassQuestionsPanel from './ClassQuestionsPanel.vue';
 import ClassStatsPanel from './ClassStatsPanel.vue';
 import ClassAddQuestionPanel from './ClassAddQuestionPanel.vue';
+import ClassChatPanel from './ClassChatPanel.vue';
+import ClassKnowledgePanel from './ClassKnowledgePanel.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -71,7 +81,9 @@ const classId = computed(() => Number(route.params.id));
 const loginUser = computed(() => store.state.user?.loginUser);
 const avatarUrl = computed(() => store.state.user?.loginUser?.userAvatar || '');
 const classInfo = ref<ClassVO>({});
-const selectedMenu = ref<'members' | 'questions' | 'stats'>('members');
+const selectedMenu = ref<
+  'members' | 'questions' | 'stats' | 'knowledge' | 'chat' | 'add_question'
+>('members');
 
 const loadClassInfo = async () => {
   try {
@@ -168,6 +180,9 @@ onMounted(() => {
 .sider-wrap {
   width: 220px;
   flex: none;
+  position: sticky;
+  top: 70px;
+  align-self: flex-start;
 }
 
 .content-wrap {

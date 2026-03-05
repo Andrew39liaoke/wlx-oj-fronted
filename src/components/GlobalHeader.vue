@@ -8,8 +8,8 @@
           disabled
         >
           <div class="title-bar">
-            <img class="logo" src="../assets/oj-logo.svg" />
-            <div class="title">wlxOJ</div>
+            <img class="logo" src="../assets/icode-logo.png" />
+            <div class="title">Icode</div>
           </div>
         </a-menu-item>
 
@@ -152,7 +152,7 @@ const handleLogout = async () => {
 }
 
 .logo {
-  height: 20px;
+  height: 32px;
   opacity: 0.96;
 }
 

@@ -45,6 +45,28 @@
       </div>
 
       <div
+        class="menu-item"
+        :class="{ active: selected === 'knowledge' }"
+        @click="$emit('update:selected', 'knowledge')"
+        role="button"
+        tabindex="0"
+      >
+        <icon-folder class="menu-icon" />
+        <span class="menu-label">班级知识库</span>
+      </div>
+
+      <div
+        class="menu-item"
+        :class="{ active: selected === 'chat' }"
+        @click="$emit('update:selected', 'chat')"
+        role="button"
+        tabindex="0"
+      >
+        <icon-message class="menu-icon" />
+        <span class="menu-label">交流大厅</span>
+      </div>
+
+      <div
         v-if="isTeacher"
         class="menu-item"
         :class="{ active: selected === 'add_question' }"
@@ -75,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, computed } from 'vue';
+import { computed } from 'vue';
 import { useStore } from 'vuex';
 import {
   IconUser,
@@ -85,6 +107,8 @@ import {
   IconIdcard,
   IconCopy,
   IconPlus,
+  IconMessage,
+  IconFolder,
 } from '@arco-design/web-vue/es/icon';
 import message from '@arco-design/web-vue/es/message';
 import { ClassVO } from '../../../generated';

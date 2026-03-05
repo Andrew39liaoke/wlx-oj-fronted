@@ -169,6 +169,37 @@ export class QuestionControllerService {
   }
 
   /**
+   * @returns any OK
+   * @throws ApiError
+   */
+  public static getAllQuestionTags(): CancelablePromise<any> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/question/tags',
+    });
+  }
+
+  /**
+   * @param year
+   * @param month
+   * @returns Array<number> OK
+   * @throws ApiError
+   */
+  public static getSubmitCalendar(
+    year: number,
+    month: number
+  ): CancelablePromise<any> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/question/question_submit/calendar',
+      query: {
+        year: year,
+        month: month,
+      },
+    });
+  }
+
+  /**
    * @param requestBody
    * @returns ResponseEntityQuestionActionStatusResponse OK
    * @throws ApiError

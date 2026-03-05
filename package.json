@@ -1,5 +1,5 @@
 {
-  "name": "yuoj-frontend",
+  "name": "Icode",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -13,6 +13,7 @@
     "@bytemd/vue-next": "^1.21.0",
     "axios": "^1.4.0",
     "core-js": "^3.8.3",
+    "echarts": "^6.0.0",
     "lodash-es": "^4.17.23",
     "moment": "^2.29.4",
     "monaco-editor": "^0.41.0",

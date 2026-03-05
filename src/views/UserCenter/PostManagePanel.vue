@@ -96,6 +96,7 @@ import {
   PostVO,
   PostQueryRequest,
 } from '../../../generated';
+import ACCESS_ENUM from '@/access/accessEnum';
 
 const store = useStore();
 const router = useRouter();
@@ -112,9 +113,18 @@ const search = reactive<PostQueryRequest>({
 const loadData = async () => {
   loading.value = true;
   try {
-    const userId = store.state.user.loginUser?.id;
-    const req: any = { ...search, userId };
-    const res = await PostControllerService.pageSelf(req);
+    const userRole = store.state.user.loginUser?.userRole;
+    const isAdmin = userRole === ACCESS_ENUM.ADMIN;
+    let res;
+    if (isAdmin) {
+      // 管理员查全部帖子
+      res = await PostControllerService.page1({ ...search });
+    } else {
+      // 普通用户查自己的帖子
+      const userId = store.state.user.loginUser?.id;
+      const req: any = { ...search, userId };
+      res = await PostControllerService.pageSelf(req);
+    }
     if (res && res.code === 0 && res.data) {
       dataList.value = res.data.records || [];
       total.value = Number(res.data.total) || 0;

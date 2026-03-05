@@ -78,15 +78,42 @@
               <span class="submit-count">{{ record.classSubmitNum || 0 }}</span>
             </template>
           </a-table-column>
+          <a-table-column
+            title="状态"
+            :width="100"
+            align="left"
+            v-if="!isTeacher"
+          >
+            <template #cell="{ record }">
+              <span
+                v-if="userSubmitStatus[record.id] === 2"
+                style="color: #00b42a; font-weight: 500"
+                >已完成</span
+              >
+              <span v-else style="color: #86909c">未完成</span>
+            </template>
+          </a-table-column>
           <a-table-column title="操作" :width="120" align="left">
             <template #cell="{ record }">
               <a-button
-                type="primary"
+                v-if="!isTeacher"
+                :type="
+                  userSubmitStatus[record.id] === 2 ? 'outline' : 'primary'
+                "
                 size="small"
                 @click="goToQuestion(record)"
                 class="go-btn"
               >
-                去做题
+                {{ userSubmitStatus[record.id] === 2 ? '重做' : '去做题' }}
+              </a-button>
+              <a-button
+                v-else
+                type="outline"
+                size="small"
+                @click="openDetails(record)"
+                class="go-btn"
+              >
+                详情
               </a-button>
             </template>
           </a-table-column>
@@ -107,12 +134,88 @@
         size="small"
       />
     </div>
+
+    <!-- 详情弹窗 -->
+    <a-modal
+      v-model:visible="detailsVisible"
+      title="题目完成详情"
+      :footer="false"
+      :width="500"
+    >
+      <a-spin :loading="detailsLoading" style="width: 100%">
+        <a-tabs default-active-key="1">
+          <a-tab-pane key="1" :title="`已完成 (${completedUsers.length})`">
+            <a-list
+              :data="completedUsers"
+              :max-height="300"
+              :scrollbar="true"
+              v-if="completedUsers.length"
+            >
+              <template #item="{ item }">
+                <a-list-item>
+                  <a-list-item-meta :title="item.userName">
+                    <template #avatar>
+                      <a-avatar
+                        :size="32"
+                        :style="{ backgroundColor: '#165dff' }"
+                      >
+                        <img v-if="item.userAvatar" :src="item.userAvatar" />
+                        <span v-else>{{
+                          (item.userName && item.userName[0]) || '用'
+                        }}</span>
+                      </a-avatar>
+                    </template>
+                  </a-list-item-meta>
+                  <template #actions>
+                    <a-tag color="blue">提交次数: {{ item.submitCount }}</a-tag>
+                  </template>
+                </a-list-item>
+              </template>
+            </a-list>
+            <a-empty v-else description="暂无已完成的用户" />
+          </a-tab-pane>
+          <a-tab-pane key="2" :title="`未完成 (${uncompletedUsers.length})`">
+            <a-list
+              :data="uncompletedUsers"
+              :max-height="300"
+              :scrollbar="true"
+              v-if="uncompletedUsers.length"
+            >
+              <template #item="{ item }">
+                <a-list-item>
+                  <a-list-item-meta :title="item.userName">
+                    <template #avatar>
+                      <a-avatar
+                        :size="32"
+                        :style="{ backgroundColor: '#165dff' }"
+                      >
+                        <img v-if="item.userAvatar" :src="item.userAvatar" />
+                        <span v-else>{{
+                          (item.userName && item.userName[0]) || '用'
+                        }}</span>
+                      </a-avatar>
+                    </template>
+                  </a-list-item-meta>
+                  <template #actions>
+                    <a-tag color="orange"
+                      >提交次数: {{ item.submitCount }}</a-tag
+                    >
+                  </template>
+                </a-list-item>
+              </template>
+            </a-list>
+            <a-empty v-else description="暂无未完成的用户" />
+          </a-tab-pane>
+        </a-tabs>
+      </a-spin>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import { IconSearch } from '@arco-design/web-vue/es/icon';
 import message from '@arco-design/web-vue/es/message';
 import {
@@ -126,6 +229,7 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
+const store = useStore();
 const loading = ref(false);
 const dataList = ref<any[]>([]);
 const total = ref(0);
@@ -135,6 +239,44 @@ const searchParams = reactive<ClassQuestionQueryRequest>({
   pageSize: 5,
   classId: props.classId,
 });
+const userSubmitStatus = ref<Record<string, number | null>>({});
+
+const isTeacher = computed(() => {
+  const role = store.state.user?.loginUser?.userRole;
+  return role === 'admin' || role === 'teacher';
+});
+
+const detailsVisible = ref(false);
+const detailsLoading = ref(false);
+const detailData = ref<any[]>([]);
+
+const completedUsers = computed(() =>
+  detailData.value.filter((u) => u.isAccepted)
+);
+const uncompletedUsers = computed(() =>
+  detailData.value.filter((u) => !u.isAccepted)
+);
+
+const openDetails = async (record: any) => {
+  detailsVisible.value = true;
+  detailsLoading.value = true;
+  detailData.value = [];
+  try {
+    const res = await ClassControllerService.getClassQuestionSubmitDetail(
+      props.classId,
+      record.id
+    );
+    if (res.code === 0 && res.data) {
+      detailData.value = res.data;
+    } else {
+      message.error(`加载详情失败: ${res.message}`);
+    }
+  } catch (e) {
+    message.error('加载详情失败');
+  } finally {
+    detailsLoading.value = false;
+  }
+};
 
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -154,7 +296,7 @@ const loadData = async () => {
     if (res.code === 0 && res.data) {
       dataList.value = res.data.records || [];
       total.value = Number(res.data.total) || 0;
-      await loadClassSubmitStats();
+      await Promise.all([loadClassSubmitStats(), loadUserSubmitStatus()]);
     } else {
       message.error(`加载失败: ${res.message}`);
     }
@@ -183,6 +325,25 @@ const loadClassSubmitStats = async () => {
     }
   });
   await Promise.all(promises);
+};
+
+const loadUserSubmitStatus = async () => {
+  try {
+    const res = await ClassControllerService.getClassQuestionSubmitInfo(
+      props.classId
+    );
+    if (res.code === 0 && res.data) {
+      res.data.forEach((item: any) => {
+        const qId = item['题目id'];
+        const status = item['提交状态'];
+        if (qId !== undefined) {
+          userSubmitStatus.value[qId] = status;
+        }
+      });
+    }
+  } catch (e) {
+    console.error('加载用户提交状态失败', e);
+  }
 };
 
 const onPageChange = (page: number) => {

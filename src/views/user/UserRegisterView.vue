@@ -4,8 +4,8 @@
     <div class="brand-side">
       <div class="brand-content">
         <div class="logo-wrapper">
-          <div class="logo-icon">W</div>
-          <span class="logo-text">wlxOJ Online Judge</span>
+          <div class="logo-icon">I</div>
+          <span class="logo-text">Icode Online Judge</span>
         </div>
         <div class="slogan">
           <h1>开启代码的<br />全新旅程</h1>

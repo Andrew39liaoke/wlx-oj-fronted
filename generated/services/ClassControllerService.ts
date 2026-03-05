@@ -213,6 +213,26 @@ export class ClassControllerService {
   }
 
   /**
+   * @param classId
+   * @param questionId
+   * @returns ResponseEntityListMapStringObject OK
+   * @throws ApiError
+   */
+  public static getClassQuestionSubmitDetail(
+    classId: number,
+    questionId: number
+  ): CancelablePromise<ResponseEntityListMapStringObject> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/auth/class/question/submit/detail',
+      query: {
+        classId: classId,
+        questionId: questionId,
+      },
+    });
+  }
+
+  /**
    * @param requestBody
    * @returns ResponseEntityPageClassVO OK
    * @throws ApiError
@@ -260,4 +280,83 @@ export class ClassControllerService {
       mediaType: 'application/json',
     });
   }
+
+  /**
+   * 获取班级统计图表数据
+   * @param classId
+   * @returns any OK
+   * @throws ApiError
+   */
+  public static getClassStatsCharts(
+    classId: number
+  ): CancelablePromise<any> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/auth/class/stats/charts',
+      query: {
+        classId: classId,
+      },
+    });
+  }
+
+  /**
+   * 添加班级知识库文件
+   * @param classId
+   * @param requestBody
+   * @returns ResponseEntityBoolean OK
+   * @throws ApiError
+   */
+  public static addClassKnowledge(
+    classId: number,
+    requestBody?: {
+      file: Blob;
+    }
+  ): CancelablePromise<ResponseEntityBoolean> {
+    return __request(OpenAPI, {
+      method: 'POST',
+      url: '/api/auth/class/knowledge/add',
+      query: {
+        classId: classId,
+      },
+      formData: requestBody,
+    });
+  }
+
+  /**
+   * 删除班级知识库文件
+   * @param id
+   * @returns ResponseEntityBoolean OK
+   * @throws ApiError
+   */
+  public static deleteClassKnowledge(
+    id: number
+  ): CancelablePromise<ResponseEntityBoolean> {
+    return __request(OpenAPI, {
+      method: 'POST',
+      url: '/api/auth/class/knowledge/delete',
+      query: {
+        id: id,
+      },
+    });
+  }
+
+  /**
+   * 获取班级知识库列表
+   * @param classId
+   * @returns any OK
+   * @throws ApiError
+   */
+  public static listClassKnowledge(
+    classId: number
+  ): CancelablePromise<any> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/auth/class/knowledge/list',
+      query: {
+        classId: classId,
+      },
+    });
+  }
+
+  
 }

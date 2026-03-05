@@ -10,6 +10,9 @@
       <MyClassPanel v-else-if="selected === 'class'" />
       <ClassManagePanel v-else-if="selected === 'class_manage'" />
       <UserManagePanel v-else-if="selected === 'users'" />
+      <AiAssistantPanel v-else-if="selected === 'ai_assistant'" :class-id="0" />
+      <RecommendPanel v-else-if="selected === 'recommend'" />
+      <CrawlerPanel v-else-if="selected === 'crawler'" />
     </div>
   </div>
 </template>
@@ -24,9 +27,20 @@ import QuestionManagePanel from './QuestionManagePanel.vue';
 import UserManagePanel from './UserManagePanel.vue';
 import MyClassPanel from './MyClassPanel.vue';
 import ClassManagePanel from './ClassManagePanel.vue';
+import AiAssistantPanel from './AiAssistantPanel.vue';
+import RecommendPanel from '../RecommendView.vue';
+import CrawlerPanel from './CrawlerPanel.vue';
 
 const selected = ref<
-  'profile' | 'posts' | 'questions' | 'users' | 'class' | 'class_manage'
+  | 'profile'
+  | 'posts'
+  | 'questions'
+  | 'users'
+  | 'class'
+  | 'class_manage'
+  | 'ai_assistant'
+  | 'recommend'
+  | 'crawler'
 >('profile');
 const route = useRoute();
 
@@ -38,7 +52,10 @@ onMounted(() => {
     s === 'questions' ||
     s === 'users' ||
     s === 'class' ||
-    s === 'class_manage'
+    s === 'class_manage' ||
+    s === 'ai_assistant' ||
+    s === 'recommend' ||
+    s === 'crawler'
   ) {
     selected.value = s as any;
   }
@@ -54,7 +71,8 @@ watch(
       s === 'questions' ||
       s === 'users' ||
       s === 'class' ||
-      s === 'class_manage'
+      s === 'class_manage' ||
+      s === 'ai_assistant'
     ) {
       selected.value = s as any;
     }

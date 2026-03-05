@@ -76,6 +76,7 @@ import {
   QuestionVO,
   QuestionQueryRequest,
 } from '../../../generated';
+import ACCESS_ENUM from '@/access/accessEnum';
 
 const store = useStore();
 const router = useRouter();
@@ -84,7 +85,7 @@ const total = ref(0);
 const search = reactive<QuestionQueryRequest>({
   title: '',
   tags: [],
-  pageSize: 8,
+  pageSize: 7,
   current: 1,
 });
 
@@ -102,9 +103,18 @@ const columns = [
 
 const loadData = async () => {
   try {
-    const userId = store.state.user.loginUser?.id;
-    const req: any = { ...search, userId };
-    const res = await QuestionControllerService.listMyQuestionVoByPage(req);
+    const userRole = store.state.user.loginUser?.userRole;
+    const isAdmin = userRole === ACCESS_ENUM.ADMIN;
+    let res;
+    if (isAdmin) {
+      // 管理员查全部题目
+      res = await QuestionControllerService.listQuestionVoByPage({ ...search });
+    } else {
+      // 普通用户查自己的题目
+      const userId = store.state.user.loginUser?.id;
+      const req: any = { ...search, userId };
+      res = await QuestionControllerService.listMyQuestionVoByPage(req);
+    }
     if (res && res.code === 0 && res.data) {
       dataList.value = res.data.records || [];
       total.value = Number(res.data.total) || 0;

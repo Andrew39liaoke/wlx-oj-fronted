@@ -34,6 +34,30 @@
       <span class="menu-label">题目管理</span>
     </div>
 
+    <!-- AI 助手 -->
+    <div
+      class="menu-item"
+      :class="{ active: selected === 'ai_assistant' }"
+      @click="$emit('update:selected', 'ai_assistant')"
+      role="button"
+      tabindex="0"
+    >
+      <icon-robot class="menu-icon" />
+      <span class="menu-label">AI 助手</span>
+    </div>
+
+    <div
+      v-if="isStudent"
+      class="menu-item"
+      :class="{ active: selected === 'recommend' }"
+      @click="$emit('update:selected', 'recommend')"
+      role="button"
+      tabindex="0"
+    >
+      <icon-bulb class="menu-icon" />
+      <span class="menu-label">个性推荐</span>
+    </div>
+
     <div
       v-if="isStudent"
       class="menu-item"
@@ -70,6 +94,18 @@
       <span class="menu-label">用户管理</span>
     </div>
 
+    <div
+      v-if="isAdmin"
+      class="menu-item"
+      :class="{ active: selected === 'crawler' }"
+      @click="$emit('update:selected', 'crawler')"
+      role="button"
+      tabindex="0"
+    >
+      <icon-sync class="menu-icon" />
+      <span class="menu-label">爬虫数据</span>
+    </div>
+
     <div class="menu-spacer"></div>
 
     <div class="side-bottom" role="region" aria-label="侧边栏底部">
@@ -103,7 +139,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, withDefaults, computed } from 'vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import {
@@ -113,6 +149,9 @@ import {
   IconHome,
   IconMenu,
   IconUserGroup,
+  IconRobot,
+  IconBulb,
+  IconSync,
 } from '@arco-design/web-vue/es/icon';
 import ACCESS_ENUM from '@/access/accessEnum';
 

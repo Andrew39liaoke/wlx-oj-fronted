@@ -26,6 +26,7 @@ export type { PagePostVO } from './models/PagePostVO';
 export type { PageQuestion } from './models/PageQuestion';
 export type { PageQuestionSubmitVO } from './models/PageQuestionSubmitVO';
 export type { PageQuestionVO } from './models/PageQuestionVO';
+export type { PageRecommendationVO } from './models/PageRecommendationVO';
 export type { PageUser } from './models/PageUser';
 export type { PageUserVO } from './models/PageUserVO';
 export type { PostAddRequest } from './models/PostAddRequest';
@@ -46,6 +47,8 @@ export type { QuestionSubmitQueryRequest } from './models/QuestionSubmitQueryReq
 export type { QuestionSubmitVO } from './models/QuestionSubmitVO';
 export type { QuestionUpdateRequest } from './models/QuestionUpdateRequest';
 export type { QuestionVO } from './models/QuestionVO';
+export type { RecommendQueryRequest } from './models/RecommendQueryRequest';
+export type { RecommendationVO } from './models/RecommendationVO';
 export type { ResponseEntityBoolean } from './models/ResponseEntityBoolean';
 export type { ResponseEntityFileInfo } from './models/ResponseEntityFileInfo';
 export type { ResponseEntityFileUploadResponse } from './models/ResponseEntityFileUploadResponse';
@@ -60,6 +63,7 @@ export type { ResponseEntityPagePostVO } from './models/ResponseEntityPagePostVO
 export type { ResponseEntityPageQuestion } from './models/ResponseEntityPageQuestion';
 export type { ResponseEntityPageQuestionSubmitVO } from './models/ResponseEntityPageQuestionSubmitVO';
 export type { ResponseEntityPageQuestionVO } from './models/ResponseEntityPageQuestionVO';
+export type { ResponseEntityPageRecommendationVO } from './models/ResponseEntityPageRecommendationVO';
 export type { ResponseEntityPageUser } from './models/ResponseEntityPageUser';
 export type { ResponseEntityPageUserVO } from './models/ResponseEntityPageUserVO';
 export type { ResponseEntityPostCommentVO } from './models/ResponseEntityPostCommentVO';
@@ -92,6 +96,7 @@ export { QuestionControllerService } from './services/QuestionControllerService'
 export { QuestionFavourControllerService } from './services/QuestionFavourControllerService';
 export { QuestionInnerControllerService } from './services/QuestionInnerControllerService';
 export { QuestionThumbControllerService } from './services/QuestionThumbControllerService';
+export { RecommendationControllerService } from './services/RecommendationControllerService';
 export { UserControllerService } from './services/UserControllerService';
 export { UserInnerControllerService } from './services/UserInnerControllerService';
 export { WxControllerService } from './services/WxControllerService';
