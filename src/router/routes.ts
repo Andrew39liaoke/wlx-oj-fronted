@@ -7,7 +7,7 @@ import AdminView from '@/views/AdminView.vue';
 import NoAuthView from '@/views/NoAuthView.vue';
 import ACCESS_ENUM from '@/access/accessEnum';
 import AddQuestionView from '@/views/question/AddQuestionView.vue';
-import ManageQuestionView from '@/views/question/ManageQuestionView.vue';
+
 import QuestionsView from '@/views/question/QuestionsView.vue';
 import QuestionSubmitView from '@/views/question/QuestionSubmitView.vue';
 import ViewQuestionView from '@/views/question/ViewQuestionView.vue';
@@ -82,14 +82,7 @@ export const routes: Array<RouteRecordRaw> = [
       hideInMenu: true,
     },
   },
-  {
-    path: '/manage/question/',
-    name: '管理题目',
-    component: ManageQuestionView,
-    meta: {
-      access: ACCESS_ENUM.ADMIN,
-    },
-  },
+
   {
     path: '/recommend',
     name: '个性化推荐',

@@ -48,6 +48,10 @@
           v-else-if="selectedMenu === 'chat'"
           :class-id="classId"
         />
+        <ClassLivePanel
+          v-else-if="selectedMenu === 'live'"
+          :class-id="classId"
+        />
         <ClassAddQuestionPanel
           v-else-if="selectedMenu === 'add_question'"
           :class-id="classId"
@@ -72,6 +76,7 @@ import ClassStatsPanel from './ClassStatsPanel.vue';
 import ClassAddQuestionPanel from './ClassAddQuestionPanel.vue';
 import ClassChatPanel from './ClassChatPanel.vue';
 import ClassKnowledgePanel from './ClassKnowledgePanel.vue';
+import ClassLivePanel from './ClassLivePanel.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -82,7 +87,13 @@ const loginUser = computed(() => store.state.user?.loginUser);
 const avatarUrl = computed(() => store.state.user?.loginUser?.userAvatar || '');
 const classInfo = ref<ClassVO>({});
 const selectedMenu = ref<
-  'members' | 'questions' | 'stats' | 'knowledge' | 'chat' | 'add_question'
+  | 'members'
+  | 'questions'
+  | 'stats'
+  | 'knowledge'
+  | 'chat'
+  | 'live'
+  | 'add_question'
 >('members');
 
 const loadClassInfo = async () => {

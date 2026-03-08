@@ -67,6 +67,17 @@
       </div>
 
       <div
+        class="menu-item"
+        :class="{ active: selected === 'live' }"
+        @click="$emit('update:selected', 'live')"
+        role="button"
+        tabindex="0"
+      >
+        <icon-video-camera class="menu-icon" />
+        <span class="menu-label">班级直播</span>
+      </div>
+
+      <div
         v-if="isTeacher"
         class="menu-item"
         :class="{ active: selected === 'add_question' }"
@@ -109,6 +120,7 @@ import {
   IconPlus,
   IconMessage,
   IconFolder,
+  IconVideoCamera,
 } from '@arco-design/web-vue/es/icon';
 import message from '@arco-design/web-vue/es/message';
 import { ClassVO } from '../../../generated';
